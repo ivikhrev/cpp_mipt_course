@@ -32,18 +32,32 @@
     ],
     "buildPresets": [
         {
-            "name": "Debug Build GCC",
+            "name": "Debug",
             "description": "",
             "displayName": "",
             "configurePreset": "Debug GCC",
             "jobs": 16
         },
         {
-            "name": "Release Build",
+            "name": "Release",
             "description": "",
             "displayName": "",
             "configurePreset": "Release GCC",
             "jobs": 16
+        }
+    ],
+    "testPresets": [
+        {
+            "name": "Debug",
+            "description": "",
+            "displayName": "",
+            "configurePreset": "Debug"
+        },
+        {
+            "name": "Release",
+            "description": "",
+            "displayName": "",
+            "configurePreset": "Release"
         }
     ]
 }

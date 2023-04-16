@@ -1,7 +1,0 @@
-file(GLOB_RECURSE HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.hpp)
-file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
-
-add_target(NAME triangle_intersection_3d
-           SOURCES ${SOURCES}
-           HEADERS ${HEADERS}
-           INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/include")
