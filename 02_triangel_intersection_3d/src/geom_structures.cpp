@@ -73,3 +73,24 @@ bool Plane::operator==(const Plane& other) const {
         fabsf(c - other.c) < numeric_utils::epsilon &&
         fabsf(d - other.d) < numeric_utils::epsilon;
 }
+
+Vec3 Plane::get_normal() const {
+    return {a, b, c};
+}
+
+float Plane::operator() (const Vec3& p) const {
+    return a * p.x + b * p.y + c * p.z + d;
+}
+
+bool point_belong_to_plane(const Plane& plane, const Vec3& p) {
+    return fabsf(plane(p)) < numeric_utils::epsilon;
+}
+
+float calc_signed_distance(const Plane& plane, const Vec3& point) {
+    Vec3 plane_normal = plane.get_normal();
+    return plane(point) / plane_normal.len();
+}
+
+bool triangle_intersection(const Triangle& t1, const Triangle& t2) {
+
+}

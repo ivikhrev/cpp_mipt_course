@@ -49,6 +49,9 @@ struct Plane {
     bool operator==(const Plane& other) const;
     bool operator!=(const Plane& other) const;
 
+    Vec3 get_normal() const;
+    float operator() (const Vec3& p) const;
+
     friend std::ostream& operator<<(std::ostream& os, const Plane& p) {
         return os << p.a << " " << p.b << " " << p.c << " " << p.d;
     }
@@ -63,8 +66,10 @@ struct Triangle {
     bool valid() const;
 };
 
+bool point_belong_to_plane(const Plane& plane, const Vec3& p);
+
 Vec3 cross_product(const Vec3& v1, const Vec3& v2);
 
-float calc_distance(const Plane& plane, const Vec3& point);
+float calc_signed_distance(const Plane& plane, const Vec3& point);
 
 bool triangle_intersection(const Triangle& t1, const Triangle& t2);

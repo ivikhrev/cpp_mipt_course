@@ -97,7 +97,22 @@ TEST(Plane, Plane) {
     Vec3 v2(4.f, -2.f, -2.f);
     Vec3 v3(4.f, 1.f, 4.f);
 
-    EXPECT_EQ(Plane(v1, v2, v3),Plane(9, -18, 9, -54));
+    EXPECT_EQ(Plane(v1, v2, v3), Plane(9, -18, 9, -54));
+}
+
+TEST(Plane, SubstitutePoint) {
+    Plane plane = Plane(9, -18, 9, -54);
+    Vec3 point(1.f, -2.f, 1.f);
+
+    EXPECT_FLOAT_EQ(plane(point), 0.0f);
+}
+
+TEST(Plane, CheckPointsBelongToPlane) {
+    Plane plane = Plane(9, -18, 9, -54);
+    Vec3 point1(1.f, -2.f, 1.f);
+    Vec3 point2(1.f, 1.f, 1.f);
+    EXPECT_TRUE(point_belong_to_plane(plane, point1));
+    EXPECT_FALSE(point_belong_to_plane(plane, point2));
 }
 
 int main(int argc, char **argv) {
