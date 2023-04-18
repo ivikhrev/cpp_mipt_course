@@ -11,34 +11,34 @@ TEST(Vec3, DefaultConstruct) {
 }
 
 TEST(Vec3, DefaultConstructNotValid) {
-    EXPECT_EQ(Vec3{}.valid(), false);
+    EXPECT_FALSE(Vec3{}.valid());
 }
 
 TEST(Vec3, ValidVec3IsValid) {
-    EXPECT_EQ(Vec3(0.f, 0.f, 0.f).valid(), true);
+    EXPECT_TRUE(Vec3(0.f, 0.f, 0.f).valid());
 }
 
-TEST(Vec3, Equal) {
+TEST(Vec3, EqualPointsIsEqual) {
     Vec3 p1{0.f, 0.f, 0.f};
     Vec3 p2{0.f, 0.f, 0.f};
 
     ASSERT_EQ(p1, p2);
 }
 
-TEST(Vec3, NotEqual) {
+TEST(Vec3, NotEqualPointsIsNotEqual) {
     Vec3 p1{0.f, 0.f, 0.f};
     Vec3 p2{1.f, 0.f, 0.f};
 
     EXPECT_NE(p1, p2);
 }
 
-TEST(Vec3, AddZero) {
+TEST(Vec3, AddZeroDidNothing) {
     Vec3 p1{1.f, 1.f, 1.f};
     Vec3 p2{0.f, 0.f, 0.f};
     ASSERT_EQ(p1 + p2, p1);
 }
 
-TEST(Vec3, Add) {
+TEST(Vec3, SimpleAddIsCorrect) {
     Vec3 p1{1.f, 1.f, 1.f};
     Vec3 p2{1.f, 2.f, 3.f};
     EXPECT_EQ(p1 + p2, Vec3(2.f,3.f,4.f));
@@ -56,7 +56,29 @@ TEST(Vec3, Subtract) {
     EXPECT_EQ(p1 - p2, Vec3(0.f, 0.f, 0.f));
 }
 
-TEST(CrossProduct, CrossProduct) {
+TEST(Vec3, NormalizedVecIsNormalized) {
+    Vec3 p1{1.f, 0.f, 0.f};
+    EXPECT_TRUE(p1.is_normalized());
+    Vec3 p2{0.f, 1.f, 0.f};
+    EXPECT_TRUE(p2.is_normalized());
+    Vec3 p3{0.f, 0.f, 1.f};
+    EXPECT_TRUE(p3.is_normalized());
+}
+
+TEST(Vec3, NotNormalizedVecIsNotNormalized) {
+    Vec3 p1{1.f, 1.f, 1.f};
+    EXPECT_FALSE(p1.is_normalized());
+}
+
+TEST(Vec3, CanNormalizeVector) {
+    Vec3 p1{1.f, 1.f, 1.f};
+    EXPECT_FALSE(p1.is_normalized());
+    p1.normalize();
+    EXPECT_EQ(p1, Vec3(0.57735026919f, 0.57735026919f, 0.57735026919f));
+    EXPECT_TRUE(p1.is_normalized());
+}
+
+TEST(CrossProduct, CrossProduct1) {
     Vec3 p1(5.f, 6.f, 2.f);
     Vec3 p2(1.f, 1.f, 1.f);
 
@@ -68,6 +90,14 @@ TEST(CrossProduct, CrossProduct2) {
     Vec3 p2(3.f, 3.f, 3.f);
 
     EXPECT_EQ(cross_product(p1, p2), Vec3(9.f, -18.f, 9.f));
+}
+
+TEST(Plane, Plane) {
+    Vec3 v1(1.f, -2.f, 1.f);
+    Vec3 v2(4.f, -2.f, -2.f);
+    Vec3 v3(4.f, 1.f, 4.f);
+
+    EXPECT_EQ(Plane(v1, v2, v3),Plane(9, -18, 9, -54));
 }
 
 int main(int argc, char **argv) {

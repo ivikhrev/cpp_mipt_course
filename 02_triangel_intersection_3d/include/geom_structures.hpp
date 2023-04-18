@@ -1,14 +1,17 @@
 #include <cmath>
+#include <iostream>
+
+namespace numeric_utils {
+    constexpr float epsilon = 1e-6;
+}
 
 struct Vec3 {
     float x = std::nanf("x");
     float y = std::nanf("y");
     float z = std::nanf("z");
 
-    static constexpr float epsilon = 1e-6;
-
     Vec3() = default;
-    Vec3(float x, float y, float z) : x(x), y(y), z(z);
+    Vec3(float x, float y, float z) : x(x), y(y), z(z) {}
 
     bool valid() const;
     bool is_normalized() const;
@@ -22,7 +25,11 @@ struct Vec3 {
     Vec3& operator-=(const Vec3& other);
 
     float len() const;
-    void normilize();
+    void normalize();
+
+    friend std::ostream& operator<<(std::ostream& os, const Vec3& v) {
+        return os << v.x << " " << v.y << " " << v.z;
+    }
 };
 
 struct Line {
@@ -36,7 +43,15 @@ struct Plane {
     float c = 0.0f;
     float d = 0.0f;
 
-    Plane(Vec3 p1, Vec3 p2, Vec3 p3);
+    Plane(float a, float b, float c, float d) : a(a), b(b), c(c), d(d) {}
+    Plane(const Vec3& p1, const Vec3& p2, const Vec3& p3);
+
+    bool operator==(const Plane& other) const;
+    bool operator!=(const Plane& other) const;
+
+    friend std::ostream& operator<<(std::ostream& os, const Plane& p) {
+        return os << p.a << " " << p.b << " " << p.c << " " << p.d;
+    }
 };
 
 struct Triangle {
@@ -48,8 +63,8 @@ struct Triangle {
     bool valid() const;
 };
 
-Vec3 cross_product(Vec3 v1, Vec3 v2);
+Vec3 cross_product(const Vec3& v1, const Vec3& v2);
 
-float calc_distance(Plane plane, Vec3 point);
+float calc_distance(const Plane& plane, const Vec3& point);
 
-bool triangle_intersection(Triangle t1, Triangle t2);
+bool triangle_intersection(const Triangle& t1, const Triangle& t2);

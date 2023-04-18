@@ -21,9 +21,9 @@ Vec3& Vec3::operator-=(const Vec3& other) {
 }
 
 bool Vec3::operator==(const Vec3& other) const {
-    return fabsf(x - other.x) < epsilon &&
-        fabsf(y - other.y) < epsilon &&
-        fabsf(z - other.z) < epsilon;
+    return fabsf(x - other.x) < numeric_utils::epsilon &&
+        fabsf(y - other.y) < numeric_utils::epsilon &&
+        fabsf(z - other.z) < numeric_utils::epsilon;
 }
 
 bool Vec3::operator!=(const Vec3& other) const {
@@ -39,17 +39,17 @@ float Vec3::len() const {
 }
 
 bool Vec3::is_normalized() const {
-    return len() < epsilon;
+    return fabsf(len() - 1.f) < numeric_utils::epsilon;
 }
 
-void Vec3::normilize() {
+void Vec3::normalize() {
     float l = len();
     x /= l;
     y /= l;
     z /= l;
 }
 
-Vec3 cross_product(Vec3 v1, Vec3 v2) {
+Vec3 cross_product(const Vec3& v1, const Vec3& v2) {
     return Vec3{
         v1.y * v2.z - v1.z * v2.y,
         v1.z * v2.x - v1.x * v2.z,
@@ -57,7 +57,7 @@ Vec3 cross_product(Vec3 v1, Vec3 v2) {
     };
 }
 
-Plane::Plane(Vec3 p1, Vec3 p2, Vec3 p3) {
+Plane::Plane(const Vec3& p1, const Vec3& p2, const Vec3& p3) {
     Vec3 first = p2 - p1;
     Vec3 second = p3 - p1;
     Vec3 product = cross_product(first, second);
@@ -65,4 +65,11 @@ Plane::Plane(Vec3 p1, Vec3 p2, Vec3 p3) {
     b = product.y;
     c = product.z;
     d  = -a * p1.x - b * p1.y - c * p1.z;
+}
+
+bool Plane::operator==(const Plane& other) const {
+    return fabsf(a - other.a) < numeric_utils::epsilon &&
+        fabsf(b - other.b) < numeric_utils::epsilon &&
+        fabsf(c - other.c) < numeric_utils::epsilon &&
+        fabsf(d - other.d) < numeric_utils::epsilon;
 }

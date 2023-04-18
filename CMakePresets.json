@@ -13,8 +13,7 @@
                 "CMAKE_CXX_FLAGS": "-std=c++17 -Wall -Werror -Wno-unused-variable"
             },
             "environment": {
-                "GTEST_COLOR": "1"
-
+                "GTEST_COLOR": "0"
             }
         },
         {
@@ -55,13 +54,19 @@
             "name": "Debug",
             "description": "",
             "displayName": "",
-            "configurePreset": "Debug"
+            "configurePreset": "Debug",
+            "output" : {
+                "outputOnFailure": true
+            }
         },
         {
             "name": "Release",
             "description": "",
             "displayName": "",
-            "configurePreset": "Release"
+            "configurePreset": "Release",
+            "output" : {
+                "outputOnFailure": true
+            }
         }
     ]
 }
