@@ -14,7 +14,7 @@ struct Vec3 {
     Vec3(float x, float y, float z) : x(x), y(y), z(z) {}
 
     bool valid() const;
-    bool is_normalized() const;
+    bool normalized() const;
 
     bool operator==(const Vec3& other) const;
     bool operator!=(const Vec3& other) const;
@@ -58,12 +58,15 @@ struct Plane {
 };
 
 struct Triangle {
-    Vec3 v1;
-    Vec3 v2;
-    Vec3 v3;
+    Vec3 p1;
+    Vec3 p2;
+    Vec3 p3;
 
-    Plane get_plane();
+    Triangle(const Vec3& p1, const Vec3& p2, const Vec3& p3);
+
+    Plane get_plane() const;
     bool valid() const;
+    bool degenerate() const;
 };
 
 bool point_belong_to_plane(const Plane& plane, const Vec3& p);
@@ -71,5 +74,7 @@ bool point_belong_to_plane(const Plane& plane, const Vec3& p);
 Vec3 cross_product(const Vec3& v1, const Vec3& v2);
 
 float calc_signed_distance(const Plane& plane, const Vec3& point);
+
+float calc_distance(const Vec3& point1, const Vec3& point2);
 
 bool triangle_intersection(const Triangle& t1, const Triangle& t2);

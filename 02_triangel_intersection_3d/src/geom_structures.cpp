@@ -1,5 +1,6 @@
 #include "geom_structures.hpp"
 
+#include <algorithm>
 #include <cmath>
 
 Vec3 Vec3::operator+(const Vec3& other) const {
@@ -38,7 +39,7 @@ float Vec3::len() const {
     return sqrtf(x * x + y * y + z * z);
 }
 
-bool Vec3::is_normalized() const {
+bool Vec3::normalized() const {
     return fabsf(len() - 1.f) < numeric_utils::epsilon;
 }
 
@@ -68,10 +69,12 @@ Plane::Plane(const Vec3& p1, const Vec3& p2, const Vec3& p3) {
 }
 
 bool Plane::operator==(const Plane& other) const {
-    return fabsf(a - other.a) < numeric_utils::epsilon &&
-        fabsf(b - other.b) < numeric_utils::epsilon &&
-        fabsf(c - other.c) < numeric_utils::epsilon &&
-        fabsf(d - other.d) < numeric_utils::epsilon;
+
+    return ;
+}
+
+bool Plane::operator!=(const Plane& other) const {
+    return !(*this == other);
 }
 
 Vec3 Plane::get_normal() const {
@@ -80,6 +83,25 @@ Vec3 Plane::get_normal() const {
 
 float Plane::operator() (const Vec3& p) const {
     return a * p.x + b * p.y + c * p.z + d;
+}
+
+Triangle::Triangle(const Vec3& p1, const Vec3& p2, const Vec3& p3) : p1(p1), p2(p2), p3(p3) {}
+
+Plane Triangle::get_plane() const {
+    return Plane(p1, p2, p3);
+}
+
+bool Triangle::valid() const {
+    return p1.valid() && p2.valid() && p3.valid();
+}
+
+bool Triangle::degenerate() const {
+    float distance12 = calc_distance(p1, p2);
+    float distance23 = calc_distance(p2, p3);
+    float distance13 = calc_distance(p1, p3);
+    float max_distance = std::max({distance12, distance13, distance23});
+    float two_sum = distance12 + distance13 + distance23 - max_distance;
+    return fabsf(max_distance - two_sum) < numeric_utils::epsilon;
 }
 
 bool point_belong_to_plane(const Plane& plane, const Vec3& p) {
@@ -91,6 +113,25 @@ float calc_signed_distance(const Plane& plane, const Vec3& point) {
     return plane(point) / plane_normal.len();
 }
 
-bool triangle_intersection(const Triangle& t1, const Triangle& t2) {
+float calc_distance(const Vec3& point1, const Vec3& point2) {
+    return (point2 - point1).len();
+}
 
+bool triangle_intersection(const Triangle& t1, const Triangle& t2) {
+    if (t1.degenerate() || t2.degenerate()) {
+        return false;
+    }
+
+    Plane plane1 = t1.get_plane();
+    float d1 = calc_signed_distance(plane1, t2.p1);
+    float d2 = calc_signed_distance(plane1, t2.p2);
+    float d3 = calc_signed_distance(plane1, t2.p3);
+    if (d1 < 0 && d2 < 0 && d3 < 0 ||
+        d1 > 0 && d2 > 0 && d3 > 0) {
+        return false;
+    }
+
+    Plane plane2 = t2.get_plane();
+
+    return false;
 }
