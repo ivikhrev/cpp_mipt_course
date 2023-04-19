@@ -69,8 +69,8 @@ Plane::Plane(const Vec3& p1, const Vec3& p2, const Vec3& p3) {
 }
 
 bool Plane::operator==(const Plane& other) const {
-
-    return ;
+    get_normal(), other.get_normal();
+    return false;
 }
 
 bool Plane::operator!=(const Plane& other) const {
