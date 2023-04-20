@@ -32,11 +32,6 @@ struct Vec3 {
     }
 };
 
-struct Line {
-    Vec3 p;
-    Vec3 d;
-};
-
 struct Plane {
     float a = 0.0f;
     float b = 0.0f;
@@ -57,6 +52,11 @@ struct Plane {
     }
 };
 
+struct Line {
+    Plane plane1;
+    Plane plane2;
+};
+
 struct Triangle {
     Vec3 p1;
     Vec3 p2;
@@ -71,6 +71,8 @@ struct Triangle {
 
 bool point_belong_to_plane(const Plane& plane, const Vec3& p);
 
+bool point_belong_to_line(const Plane& plane, const Vec3& p);
+
 float dot_product(const Vec3& v1, const Vec3& v2);
 
 Vec3 cross_product(const Vec3& v1, const Vec3& v2);
@@ -79,6 +81,6 @@ float calc_signed_distance(const Plane& plane, const Vec3& point);
 
 float calc_distance(const Vec3& point1, const Vec3& point2);
 
-Line planes_intersection(const Plane& plane1, const Plane& plane2);
+bool planes_are_parallel(const Plane& plane1, const Plane& plane2);
 
 bool triangle_intersection_3d(const Triangle& t1, const Triangle& t2);

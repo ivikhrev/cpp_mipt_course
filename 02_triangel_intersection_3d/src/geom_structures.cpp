@@ -114,6 +114,10 @@ bool point_belong_to_plane(const Plane& plane, const Vec3& p) {
     return fabsf(plane(p)) < numeric_utils::epsilon;
 }
 
+bool point_belong_to_line(const Line& line, const Vec3& p) {
+    return point_belong_to_plane(line.plane1, p) && point_belong_to_plane(line.plane2, p);
+}
+
 float calc_signed_distance(const Plane& plane, const Vec3& point) {
     Vec3 plane_normal = plane.normal();
     return plane(point) / plane_normal.len();
@@ -127,9 +131,8 @@ bool triangle_intersection_2d(const Triangle& t1, const Triangle& t2) {
     return false;
 }
 
-Line planes_intersection(const Plane& plane1, const Plane& plane2) {
-
-    return {};
+bool planes_are_parallel(const Plane& plane1, const Plane& plane2){
+    return cross_product(plane1.normal(), plane2.normal()) == Vec3(0.f, 0.f, 0.f);
 }
 
 bool triangle_intersection_3d(const Triangle& t1, const Triangle& t2) {
@@ -152,7 +155,7 @@ bool triangle_intersection_3d(const Triangle& t1, const Triangle& t2) {
         //compute 2d case
         return triangle_intersection_2d(t1, t2);
     }
-    else if (plane1 != plane2 && cross_product(plane1.normal(), plane2.normal()) == Vec3(0.f, 0.f, 0.f)) {
+    else if (planes_are_parallel(plane1, plane2)) {
         return false; // planes are parallel and not the same
     }
 
@@ -163,6 +166,8 @@ bool triangle_intersection_3d(const Triangle& t1, const Triangle& t2) {
         (d1 > 0 && d2 > 0 && d3 > 0)) {
         return false;
     }
-    Line intersection_line = planes_intersection(plane1, plane2);
+
+    Line intersection_line{plane1, plane2};
+
     return false;
 }
