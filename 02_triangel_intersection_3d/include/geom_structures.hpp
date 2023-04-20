@@ -49,7 +49,7 @@ struct Plane {
     bool operator==(const Plane& other) const;
     bool operator!=(const Plane& other) const;
 
-    Vec3 get_normal() const;
+    Vec3 normal() const;
     float operator() (const Vec3& p) const;
 
     friend std::ostream& operator<<(std::ostream& os, const Plane& p) {
@@ -71,10 +71,14 @@ struct Triangle {
 
 bool point_belong_to_plane(const Plane& plane, const Vec3& p);
 
+float dot_product(const Vec3& v1, const Vec3& v2);
+
 Vec3 cross_product(const Vec3& v1, const Vec3& v2);
 
 float calc_signed_distance(const Plane& plane, const Vec3& point);
 
 float calc_distance(const Vec3& point1, const Vec3& point2);
 
-bool triangle_intersection(const Triangle& t1, const Triangle& t2);
+Line planes_intersection(const Plane& plane1, const Plane& plane2);
+
+bool triangle_intersection_3d(const Triangle& t1, const Triangle& t2);

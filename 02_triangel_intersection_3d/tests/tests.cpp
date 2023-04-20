@@ -92,6 +92,20 @@ TEST(CrossProduct, CrossProduct2) {
     EXPECT_EQ(cross_product(p1, p2), Vec3(9.f, -18.f, 9.f));
 }
 
+TEST(DotProduct, DotProduct1) {
+    Vec3 p1(1.f, 0.f, 0.f);
+    Vec3 p2(1.f, 0.f, 0.f);
+
+    EXPECT_FLOAT_EQ(dot_product(p1, p2), 1.f);
+}
+
+TEST(DotProduct, DotProduct2) {
+    Vec3 p1(1.f, 1.f, 1.f);
+    Vec3 p2(1.f, 2.f, 3.f);
+
+    EXPECT_FLOAT_EQ(dot_product(p1, p2), 6.f);
+}
+
 TEST(Plane, Plane) {
     Vec3 v1(1.f, -2.f, 1.f);
     Vec3 v2(4.f, -2.f, -2.f);
