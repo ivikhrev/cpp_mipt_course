@@ -1,6 +1,10 @@
 #include "geom_structures.hpp"
 
 #include <gtest/gtest.h>
+#include <cmath>
+namespace {
+    const auto PI = std::acos(-1);
+}
 
 TEST(Vec3, CanConstruct) {
     ASSERT_NO_THROW((Vec3{0.f, 0.f, 0.f}));
@@ -131,34 +135,34 @@ TEST(Plane, CheckPointsBelongToPlane) {
 }
 
 
-TEST(SignedDistance, CalculateSignedDistanceFromPointToPlain1) {
+TEST(SignedDistance, PointToPlain1) {
     // Plane plane = Plane(9, -18, 9, -54);
     Plane plane = Plane(1, 0, 0, 0);
     Vec3 point(0.5f, 0.f, 0.f);
     EXPECT_FLOAT_EQ(calc_signed_distance(plane, point), 0.5f);
 }
 
-TEST(SignedDistance, CalculateSignedDistanceFromPointToPlain2) {
+TEST(SignedDistance, PointToPlain2) {
     // Plane plane = Plane(9, -18, 9, -54);
     Plane plane = Plane(1, 0, 0, 0);
     Vec3 point(-0.5f, 0.f, 0.f);
     EXPECT_FLOAT_EQ(calc_signed_distance(plane, point), -0.5f);
 }
 
-TEST(SignedDistance, CalculateSignedDistanceFromPointToPlain3) {
+TEST(SignedDistance, PointToPlain3) {
     // Plane plane = Plane(9, -18, 9, -54);
     Plane plane = Plane(5, 1, -1, -1);
     Vec3 point(0.5f, 0.f, 0.f);
     EXPECT_FLOAT_EQ(calc_signed_distance(plane, point), sqrtf(3) / 6);
 }
 
-TEST(Distance, CalculateDistanceBetweenPoints) {
+TEST(Distance, DifferentPoints) {
     Vec3 point1(1.f, 0.f, 0.f);
     Vec3 point2(0.f, 1.f, 0.f);
     EXPECT_FLOAT_EQ(calc_distance(point1, point2), sqrtf(2));
 }
 
-TEST(Distance, CalculateDistanceBetweenPointsSamePoint) {
+TEST(Distance, SamePoint) {
     Vec3 point1(1.f, 0.f, 0.f);
     Vec3 point2(1.f, 0.f, 0.f);
     EXPECT_FLOAT_EQ(calc_distance(point1, point2), 0.f);
@@ -168,7 +172,7 @@ TEST(Triangle, NotDegenerateTriangle) {
     Vec3 point1(1.f, 0.f, 0.f);
     Vec3 point2(0.f, 1.f, 0.f);
     Vec3 point3(0.f, 0.f, 1.f);
-    Triangle t(point1, point2, point3);
+    Triangle t({point1, point2, point3});
 
     EXPECT_FALSE(t.degenerate());
 }
@@ -177,9 +181,41 @@ TEST(Triangle, DegenerateTriangle) {
     Vec3 point1(1.f, 0.f, 0.f);
     Vec3 point2(2.f, 0.f, 0.f);
     Vec3 point3(3.f, 0.f, 0.f);
-    Triangle t(point1, point2, point3);
+    Triangle t({point1, point2, point3});
 
     EXPECT_TRUE(t.degenerate());
+}
+
+TEST(Plane, TestParallelPlanes1) {
+    EXPECT_TRUE(planes_are_parallel(Plane(1, 0, 0, 0), Plane(1, 0, 0, 0)));
+}
+
+TEST(Plane, TestParallelPlanes2) {
+    EXPECT_TRUE(planes_are_parallel(Plane(1, 0, 0, 0), Plane(1, 0, 0, 1)));
+}
+
+TEST(Plane, TestNotParallelPlanes) {
+    EXPECT_FALSE(planes_are_parallel(Plane(1, 0, 0, 0), Plane(0, 1, 0, 0)));
+}
+
+TEST(Angle, AngleBetweenPlanes) {
+    EXPECT_FLOAT_EQ(calc_angle(Plane(1, 0, 0, 0), Plane(1, 0, 0, 0)), 0.f);
+    EXPECT_FLOAT_EQ(calc_angle(Plane(1, 1, 1, 0), Plane(1, 1, 1, 0)), 0.f);
+    EXPECT_FLOAT_EQ(calc_angle(Plane(1, 0, 0, 0), Plane(0, 1, 0, 0)), PI / 2);
+    EXPECT_FLOAT_EQ(calc_angle(Plane(1, 0, 0, 0), Plane(0, 0, 1, 0)), PI / 2);
+    EXPECT_FLOAT_EQ(calc_angle(Plane(0, 1, 0, 0), Plane(0, 0, 1, 0)), PI / 2);
+
+    EXPECT_FLOAT_EQ(calc_angle(Plane(2, -1, 1, 0), Plane(1, 0, 1, 0)),  PI / 6);
+    EXPECT_FLOAT_EQ(calc_angle(Plane(2, 2, -3, -4), Plane(3, -3, 5, -3)),  0.98267967);
+}
+
+TEST(Projection, ProjectPointOntoPlane) {
+    EXPECT_EQ(calc_projection(Plane(0, 0, 1, 0), Vec3(0, 0, 1)), Vec3(0, 0, 0));
+    EXPECT_EQ(calc_projection(Plane(0, 0, 1, 0), Vec3(1, 0, 1)), Vec3(1, 0, 0));
+    EXPECT_EQ(calc_projection(Plane(0, 0, 1, 0), Vec3(0, 1, 1)), Vec3(0, 1, 0));
+    EXPECT_EQ(calc_projection(Plane(0, 0, 1, 0), Vec3(0, 0, 0)), Vec3(0, 0, 0));
+    EXPECT_EQ(calc_projection(Plane(0, 0, 1, 1), Vec3(0, 0, 1)), Vec3(0, 0, 1));
+    EXPECT_EQ(calc_projection(Plane(1, 1, 1, 1), Vec3(1, 1, 1)), Vec3(1 / 3.f, 1 / 3.f, 1 / 3.f));
 }
 
 int main(int argc, char **argv) {

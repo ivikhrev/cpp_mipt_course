@@ -1,6 +1,6 @@
 #include <cmath>
 #include <iostream>
-
+#include <vector>
 namespace numeric_utils {
     constexpr float epsilon = 1e-6;
 }
@@ -58,12 +58,13 @@ struct Line {
 };
 
 struct Triangle {
-    Vec3 p1;
-    Vec3 p2;
-    Vec3 p3;
+    std::vector<Vec3> vertices;
 
-    Triangle(const Vec3& p1, const Vec3& p2, const Vec3& p3);
+    Triangle(const std::vector<Vec3>& v) : vertices(v) {};
+    Triangle(std::initializer_list<Vec3> v) : vertices(v) {};
+    Triangle(std::vector<Vec3>&& v) : vertices(v) {};
 
+    // void sort_vertices();
     Plane get_plane() const;
     bool valid() const;
     bool degenerate() const;
@@ -81,6 +82,11 @@ float calc_signed_distance(const Plane& plane, const Vec3& point);
 
 float calc_distance(const Vec3& point1, const Vec3& point2);
 
+float calc_angle(const Plane& plane1, const Plane& plane2);
+
 bool planes_are_parallel(const Plane& plane1, const Plane& plane2);
 
-bool triangle_intersection_3d(const Triangle& t1, const Triangle& t2);
+Vec3 calc_projection(const Plane& plane, const Vec3& point);
+
+bool test_triangle_intersection_2d(const Triangle& t1, const Triangle& t2);
+bool test_triangles_intersection_3d(const Triangle& t1, const Triangle& t2);

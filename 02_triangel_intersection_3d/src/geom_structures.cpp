@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cassert>
 
 Vec3 Vec3::operator+(const Vec3& other) const {
     return {x + other.x, y + other.y, z + other.z};
@@ -79,20 +80,27 @@ float Plane::operator() (const Vec3& p) const {
     return a * p.x + b * p.y + c * p.z + d;
 }
 
-Triangle::Triangle(const Vec3& p1, const Vec3& p2, const Vec3& p3) : p1(p1), p2(p2), p3(p3) {}
+// void Triangle::sort_vertices() {
+//     auto lowest_point = std::min_element(vertices.begin(), vertices.end(), [] (auto l, auto r) {
+//         return l.z < r.z ||
+//             (fabsf(l.z - r.z) < numeric_utils::epsilon && l.y < r.y) ||
+//             (fabsf(l.z - r.z) < numeric_utils::epsilon && fabsf(l.y - r.y) < numeric_utils::epsilon && l.x < R.z);
+//     });
+// }
 
 Plane Triangle::get_plane() const {
-    return Plane(p1, p2, p3);
+    assert(vertices.size() > 2);
+    return Plane(vertices[0], vertices[1], vertices[3]);
 }
 
 bool Triangle::valid() const {
-    return p1.valid() && p2.valid() && p3.valid();
+    return std::all_of(vertices.begin(), vertices.end(), [] (const auto& v) { return v.valid(); });
 }
 
 bool Triangle::degenerate() const {
-    float distance12 = calc_distance(p1, p2);
-    float distance23 = calc_distance(p2, p3);
-    float distance13 = calc_distance(p1, p3);
+    float distance12 = calc_distance(vertices[0], vertices[1]);
+    float distance23 = calc_distance(vertices[1], vertices[2]);
+    float distance13 = calc_distance(vertices[0], vertices[2]);
     float max_distance = std::max({distance12, distance13, distance23});
     float two_sum = distance12 + distance13 + distance23 - max_distance;
     return fabsf(max_distance - two_sum) < numeric_utils::epsilon;
@@ -127,7 +135,21 @@ float calc_distance(const Vec3& point1, const Vec3& point2) {
     return (point2 - point1).len();
 }
 
-bool triangle_intersection_2d(const Triangle& t1, const Triangle& t2) {
+float calc_angle(const Plane& plane1, const Plane& plane2){
+    return std::acos(fabsf(dot_product(plane1.normal(), plane2.normal())) / (plane1.normal().len() * plane2.normal().len()));
+}
+
+Vec3 calc_projection(const Plane& plane, const Vec3& point) {
+    float k = (plane.d - plane.a * point.x - plane.b * point.y - plane.c * point.z) /
+        (plane.normal().len() * plane.normal().len());
+
+    return {point.x + k * plane.a, point.y + k * plane.b, point.z + k * plane.c};
+}
+
+bool test_triangle_intersection_2d(const Triangle& t1, const Triangle& t2) {
+    // for (int i0 = 0, i1 = 2; i0 < 3; i1 = i0, ++i0) {
+
+    // }
     return false;
 }
 
@@ -135,15 +157,15 @@ bool planes_are_parallel(const Plane& plane1, const Plane& plane2){
     return cross_product(plane1.normal(), plane2.normal()) == Vec3(0.f, 0.f, 0.f);
 }
 
-bool triangle_intersection_3d(const Triangle& t1, const Triangle& t2) {
+bool test_triangle_intersection_3d(const Triangle& t1, const Triangle& t2) {
     if (t1.degenerate() || t2.degenerate()) {
         return false;
     }
 
     Plane plane1 = t1.get_plane();
-    float d1 = calc_signed_distance(plane1, t2.p1);
-    float d2 = calc_signed_distance(plane1, t2.p2);
-    float d3 = calc_signed_distance(plane1, t2.p3);
+    float d1 = calc_signed_distance(plane1, t2.vertices[0]);
+    float d2 = calc_signed_distance(plane1, t2.vertices[1]);
+    float d3 = calc_signed_distance(plane1, t2.vertices[2]);
     if ((d1 < 0 && d2 < 0 && d3 < 0) ||
         (d1 > 0 && d2 > 0 && d3 > 0)) {
         return false;
@@ -153,15 +175,30 @@ bool triangle_intersection_3d(const Triangle& t1, const Triangle& t2) {
     // same planes
     if (plane1 == plane2) {
         //compute 2d case
-        return triangle_intersection_2d(t1, t2);
+        float angle_xy = calc_angle(plane1, Plane(0, 0, 1, 0));
+        float angle_yz = calc_angle(plane1, Plane(1, 0, 0, 0));
+        float angle_xz = calc_angle(plane1, Plane(0, 1, 0, 0));
+        if (angle_xy <= angle_yz && angle_xy <= angle_xz) {
+
+        }
+        else if (angle_yz <= angle_xy && angle_yz <= angle_xz) {
+
+        }
+        else if (angle_xz <= angle_xy && angle_xz <= angle_yz) {
+
+        }
+        Triangle t1_projection = t1;
+        Triangle t2_projection = t2;
+
+        return test_triangle_intersection_2d(t1, t2);
     }
     else if (planes_are_parallel(plane1, plane2)) {
         return false; // planes are parallel and not the same
     }
 
-    d1 = calc_signed_distance(plane2, t1.p1);
-    d2 = calc_signed_distance(plane2, t1.p2);
-    d3 = calc_signed_distance(plane2, t1.p3);
+    d1 = calc_signed_distance(plane2, t1.vertices[0]);
+    d2 = calc_signed_distance(plane2, t1.vertices[1]);
+    d3 = calc_signed_distance(plane2, t1.vertices[2]);
     if ((d1 < 0 && d2 < 0 && d3 < 0) ||
         (d1 > 0 && d2 > 0 && d3 > 0)) {
         return false;
