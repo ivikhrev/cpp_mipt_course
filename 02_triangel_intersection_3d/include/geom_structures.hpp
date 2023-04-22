@@ -60,6 +60,7 @@ struct Line {
 struct Triangle {
     std::vector<Vec3> vertices;
 
+    Triangle() = default;
     Triangle(const std::vector<Vec3>& v) : vertices(v) {};
     Triangle(std::initializer_list<Vec3> v) : vertices(v) {};
     Triangle(std::vector<Vec3>&& v) : vertices(v) {};

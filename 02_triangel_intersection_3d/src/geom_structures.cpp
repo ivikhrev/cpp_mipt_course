@@ -146,16 +146,19 @@ Vec3 calc_projection(const Plane& plane, const Vec3& point) {
     return {point.x + k * plane.a, point.y + k * plane.b, point.z + k * plane.c};
 }
 
-bool test_triangle_intersection_2d(const Triangle& t1, const Triangle& t2) {
+
+bool planes_are_parallel(const Plane& plane1, const Plane& plane2){
+    return cross_product(plane1.normal(), plane2.normal()) == Vec3(0.f, 0.f, 0.f);
+}
+
+bool test_triangle_intersection_2d(Triangle t1, Triangle t2, int zero_coordinate) {
     // for (int i0 = 0, i1 = 2; i0 < 3; i1 = i0, ++i0) {
 
     // }
     return false;
 }
 
-bool planes_are_parallel(const Plane& plane1, const Plane& plane2){
-    return cross_product(plane1.normal(), plane2.normal()) == Vec3(0.f, 0.f, 0.f);
-}
+
 
 bool test_triangle_intersection_3d(const Triangle& t1, const Triangle& t2) {
     if (t1.degenerate() || t2.degenerate()) {
@@ -175,22 +178,43 @@ bool test_triangle_intersection_3d(const Triangle& t1, const Triangle& t2) {
     // same planes
     if (plane1 == plane2) {
         //compute 2d case
-        float angle_xy = calc_angle(plane1, Plane(0, 0, 1, 0));
-        float angle_yz = calc_angle(plane1, Plane(1, 0, 0, 0));
-        float angle_xz = calc_angle(plane1, Plane(0, 1, 0, 0));
+        Plane plane_xy(0, 0, 1, 0);
+        Plane plane_yz(1, 0, 0, 0);
+        Plane plane_xz(0, 1, 0, 0);
+        float angle_xy = calc_angle(plane1, plane_xy);
+        float angle_yz = calc_angle(plane1, plane_yz);
+        float angle_xz = calc_angle(plane1, plane_xz);
+        Triangle t1_projection, t2_projection;
+        int zero_coordinate{};
         if (angle_xy <= angle_yz && angle_xy <= angle_xz) {
-
+            t1_projection = {calc_projection(plane_xy, t1.vertices[0]),
+                calc_projection(plane_xy, t1.vertices[1]),
+                calc_projection(plane_xy, t1.vertices[2])};
+            t2_projection = {calc_projection(plane_xy, t2.vertices[0]),
+                calc_projection(plane_xy, t2.vertices[1]),
+                calc_projection(plane_xy, t2.vertices[2])};
+            zero_coordinate = 2;
         }
         else if (angle_yz <= angle_xy && angle_yz <= angle_xz) {
-
+            t1_projection = {calc_projection(plane_xy, t1.vertices[0]),
+                calc_projection(plane_yz, t1.vertices[1]),
+                calc_projection(plane_yz, t1.vertices[2])};
+            t2_projection = {calc_projection(plane_xy, t2.vertices[0]),
+                calc_projection(plane_yz, t2.vertices[1]),
+                calc_projection(plane_yz, t2.vertices[2])};
+            zero_coordinate = 0;
         }
         else if (angle_xz <= angle_xy && angle_xz <= angle_yz) {
-
+            t1_projection = {calc_projection(plane_xy, t1.vertices[0]),
+                calc_projection(plane_xz, t1.vertices[1]),
+                calc_projection(plane_xz, t1.vertices[2])};
+            t2_projection = {calc_projection(plane_xy, t2.vertices[0]),
+                calc_projection(plane_xz, t2.vertices[1]),
+                calc_projection(plane_xz, t2.vertices[2])};
+            zero_coordinate = 1;
         }
-        Triangle t1_projection = t1;
-        Triangle t2_projection = t2;
 
-        return test_triangle_intersection_2d(t1, t2);
+        return test_triangle_intersection_2d(t1_projection, t2_projection, zero_coordinate);
     }
     else if (planes_are_parallel(plane1, plane2)) {
         return false; // planes are parallel and not the same
