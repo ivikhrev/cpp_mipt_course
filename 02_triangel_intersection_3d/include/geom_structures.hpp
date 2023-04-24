@@ -23,8 +23,11 @@ struct Vec3 {
     Vec3& operator+=(const Vec3& other);
     Vec3 operator-(const Vec3& other) const;
     Vec3& operator-=(const Vec3& other);
+    Vec3 operator*(int f) const;
+    Vec3 operator/(int d) const;
 
     float len() const;
+    float len_squared() const;
     void normalize();
 
     friend std::ostream& operator<<(std::ostream& os, const Vec3& v) {
@@ -53,8 +56,15 @@ struct Plane {
 };
 
 struct Line {
-    Plane plane1;
-    Plane plane2;
+    Vec3 point;
+    Vec3 direction;
+
+    Line() = default;
+    Line(const Vec3& point, const Vec3& direction) : point(point), direction(direction) {}
+    Line(const Plane& plane1, const Plane& plane2);
+
+    // bool operator==(const Line& other) const;
+    // bool operator!=(const Line& other) const;
 };
 
 struct Triangle {
@@ -65,6 +75,9 @@ struct Triangle {
     Triangle(std::initializer_list<Vec3> v) : vertices(v) {};
     Triangle(std::vector<Vec3>&& v) : vertices(v) {};
 
+    bool operator==(const Triangle& other) const;
+    bool operator!=(const Triangle& other) const;
+
     // void sort_vertices();
     Plane get_plane() const;
     bool valid() const;
@@ -73,7 +86,7 @@ struct Triangle {
 
 bool point_belong_to_plane(const Plane& plane, const Vec3& p);
 
-bool point_belong_to_line(const Plane& plane, const Vec3& p);
+bool point_belong_to_line(const Line& line, const Vec3& p);
 
 float dot_product(const Vec3& v1, const Vec3& v2);
 
@@ -88,6 +101,10 @@ float calc_angle(const Plane& plane1, const Plane& plane2);
 bool planes_are_parallel(const Plane& plane1, const Plane& plane2);
 
 Vec3 calc_projection(const Plane& plane, const Vec3& point);
+float calc_projection_1d(const Line& line, const Vec3& point);
 
-bool test_triangle_intersection_2d(const Triangle& t1, const Triangle& t2);
+bool test_triangles_intersection_2d(const Triangle& t1, const Triangle& t2);
 bool test_triangles_intersection_3d(const Triangle& t1, const Triangle& t2);
+
+Vec3 convert_point_to_2d(const Vec3& p, int zero_coordinate);
+Triangle convert_to_2d(const Triangle& t, int zero_coordinate);

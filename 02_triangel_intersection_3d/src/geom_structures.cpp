@@ -22,6 +22,14 @@ Vec3& Vec3::operator-=(const Vec3& other) {
     return *this;
 }
 
+Vec3 Vec3::operator*(int f) const {
+    return {x * f, y * f, z * f};
+}
+
+Vec3 Vec3::operator/(int f) const {
+    return {x / f, y / f, z / f};
+}
+
 bool Vec3::operator==(const Vec3& other) const {
     return fabsf(x - other.x) < numeric_utils::epsilon &&
         fabsf(y - other.y) < numeric_utils::epsilon &&
@@ -37,7 +45,11 @@ bool Vec3::valid() const {
 }
 
 float Vec3::len() const {
-    return sqrtf(x * x + y * y + z * z);
+    return sqrtf(len_squared());
+}
+
+float Vec3::len_squared() const {
+    return x * x + y * y + z * z;
 }
 
 bool Vec3::normalized() const {
@@ -80,17 +92,53 @@ float Plane::operator() (const Vec3& p) const {
     return a * p.x + b * p.y + c * p.z + d;
 }
 
-// void Triangle::sort_vertices() {
-//     auto lowest_point = std::min_element(vertices.begin(), vertices.end(), [] (auto l, auto r) {
-//         return l.z < r.z ||
-//             (fabsf(l.z - r.z) < numeric_utils::epsilon && l.y < r.y) ||
-//             (fabsf(l.z - r.z) < numeric_utils::epsilon && fabsf(l.y - r.y) < numeric_utils::epsilon && l.x < R.z);
-//     });
-// }
+Line::Line(const Plane& plane1, const Plane& plane2) {
+    // Intersection of 2-planes: a variation based on the 3-plane version.
+    // https://stackoverflow.com/a/32410473
+    direction = cross_product(plane1.normal(), plane2.normal());
+
+    float det = direction.len_squared();
+    if (det > numeric_utils::epsilon) {
+        point = (cross_product(direction, plane2.normal()) * plane1.d +
+            cross_product(plane1.normal(), direction) * plane2.d) / det;
+    } else {
+        point = Vec3{std::nanf("x"), std::nanf("y"), std::nanf("z")};
+    }
+    // TODO: fix straighforward variant
+    // if (direction == Vec3(0, 0, 0)) {
+    //     return;
+    // }
+    // float x, y, z;
+    // if (plane1.a > numeric_utils::epsilon) {
+    //     z = 0.f;
+    //     y = (-plane2.d + plane1.d * plane2.a / plane1.a) / (plane2.b - plane1.b * plane2.a / plane1.a);
+    //     x = (-plane1.d - plane1.b * y) / plane1.a;
+    // }
+    // else if (plane1.b > numeric_utils::epsilon) {
+    //     z = (-plane2.d + plane1.d * plane2.b / plane1.b) / (plane2.c - plane1.c * plane2.b / plane1.b);
+    //     y = (-plane1.d - plane1.c * z) / plane1.b;
+    //     x = 0.f;
+    // } else if (plane1.c > numeric_utils::epsilon) {
+    //     z = (-plane2.d + plane1.d * plane2.a / plane1.a) / (plane2.c - plane1.c * plane2.a / plane1.a);
+    //     y = 0.f;
+    //     x = (-plane1.d - plane1.c * z) / plane1.a;
+    // }
+    // point = {x, y, 0.f};
+}
+
+bool Triangle::operator==(const Triangle& other) const {
+    return other.vertices[0] == other.vertices[0] &&
+        other.vertices[1] == other.vertices[1] &&
+        other.vertices[2] == other.vertices[2];
+}
+
+bool Triangle::operator!=(const Triangle& other) const {
+    return !(*this == other);
+}
 
 Plane Triangle::get_plane() const {
     assert(vertices.size() > 2);
-    return Plane(vertices[0], vertices[1], vertices[3]);
+    return Plane(vertices[0], vertices[1], vertices[2]);
 }
 
 bool Triangle::valid() const {
@@ -123,7 +171,7 @@ bool point_belong_to_plane(const Plane& plane, const Vec3& p) {
 }
 
 bool point_belong_to_line(const Line& line, const Vec3& p) {
-    return point_belong_to_plane(line.plane1, p) && point_belong_to_plane(line.plane2, p);
+    return cross_product(line.point - p, line.direction) == Vec3(0.f, 0.f, 0.f);
 }
 
 float calc_signed_distance(const Plane& plane, const Vec3& point) {
@@ -146,21 +194,74 @@ Vec3 calc_projection(const Plane& plane, const Vec3& point) {
     return {point.x + k * plane.a, point.y + k * plane.b, point.z + k * plane.c};
 }
 
+float calc_projection_1d(const Line& line, const Vec3& point) {
+    return dot_product(line.direction, point - line.point);
+}
 
 bool planes_are_parallel(const Plane& plane1, const Plane& plane2){
     return cross_product(plane1.normal(), plane2.normal()) == Vec3(0.f, 0.f, 0.f);
 }
 
-bool test_triangle_intersection_2d(Triangle t1, Triangle t2, int zero_coordinate) {
-    // for (int i0 = 0, i1 = 2; i0 < 3; i1 = i0, ++i0) {
-
-    // }
-    return false;
+Vec3 perp2d(const Vec3& v) {
+    return {v.y, -v.x, 0.f};
 }
 
+std::pair<float, float> compute_interval(const Triangle& t, const Vec3& d) {
+    float min, max;
+    min = max = dot_product(d, t.vertices[0]);
+    for (int i = 1; i < static_cast<int>(t.vertices.size()); ++i) {
+        float val = dot_product(d, t.vertices[i]);
+        if (val < min) {
+            min = val;
+        }
+        else if (val > max) {
+            max = val;
+        }
+    }
+    return {min, max};
+}
 
+bool test_triangles_intersection_2d(const Triangle& t1, const Triangle& t2) {
+    // test edge normals of t1 for separation
+    for (int i0 = 0, i1 = t1.vertices.size() - 1; i0 <  static_cast<int>(t1.vertices.size()); i1 = i0, ++i0) {
+        Vec3 edge = t1.vertices[i0] - t1.vertices[i1];
+        Vec3 d = perp2d(edge);
+        auto [min0, max0] = compute_interval(t1, d);
+        auto [min1, max1] = compute_interval(t2, d);
+        if (max1 < min0 || max0 < min1) {
+            return false;
+        }
+    }
 
-bool test_triangle_intersection_3d(const Triangle& t1, const Triangle& t2) {
+    // test edge normals of t2 for separation
+    for (int i0 = 0, i1 = t2.vertices.size() - 1; i0 <  static_cast<int>(t2.vertices.size()); i1 = i0, ++i0) {
+        Vec3 edge = t2.vertices[i0] - t2.vertices[i1];
+        Vec3 d = perp2d(edge);
+        auto [min0, max0] = compute_interval(t1, d);
+        auto [min1, max1] = compute_interval(t2, d);
+        if (max1 < min0 || max0 < min1) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+Vec3 convert_point_to_2d(const Vec3& p, int zero_coordinate) {
+    if (zero_coordinate == 0)
+        return {p.y, p.z, 0.f};
+    else if (zero_coordinate == 1)
+        return {p.x, p.z, 0.f};
+    return p;
+}
+
+Triangle convert_to_2d(const Triangle& t, int zero_coordinate) {
+    return {convert_point_to_2d(t.vertices[0], zero_coordinate),
+        convert_point_to_2d(t.vertices[1], zero_coordinate),
+        convert_point_to_2d(t.vertices[2], zero_coordinate)};
+}
+
+bool test_triangles_intersection_3d(const Triangle& t1, const Triangle& t2) {
     if (t1.degenerate() || t2.degenerate()) {
         return false;
     }
@@ -214,9 +315,10 @@ bool test_triangle_intersection_3d(const Triangle& t1, const Triangle& t2) {
             zero_coordinate = 1;
         }
 
-        return test_triangle_intersection_2d(t1_projection, t2_projection, zero_coordinate);
+        return test_triangles_intersection_2d(convert_to_2d(t1_projection, zero_coordinate),
+            convert_to_2d(t2_projection, zero_coordinate));
     }
-    else if (planes_are_parallel(plane1, plane2)) {
+    else if (planes_are_parallel(plane1, plane2)) { // mb no need to check
         return false; // planes are parallel and not the same
     }
 
