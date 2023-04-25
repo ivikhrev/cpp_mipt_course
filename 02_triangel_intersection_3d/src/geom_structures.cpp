@@ -53,7 +53,7 @@ float Vec3::len_squared() const {
 }
 
 bool Vec3::normalized() const {
-    return fabsf(len() - 1.f) < numeric_utils::epsilon;
+    return fabsf(len_squared() - 1.f) < numeric_utils::epsilon;
 }
 
 void Vec3::normalize() {
