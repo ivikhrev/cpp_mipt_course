@@ -261,6 +261,19 @@ Triangle convert_to_2d(const Triangle& t, int zero_coordinate) {
         convert_point_to_2d(t.vertices[2], zero_coordinate)};
 }
 
+std::pair<float, float> compute_interval(const Triangle& t, const Line& l, const std::vector<float>& dist) {
+    float min, max;
+    float v11 = calc_projection_1d(l, t.vertices[0]);
+    float v12 = calc_projection_1d(l, t.vertices[1]);
+    float v13 = calc_projection_1d(l, t.vertices[2]);
+    float t11 = v11 + (v13 - v11) * dist[0] / (dist[0] - dist[2]);
+    float t12 = v12 + (v13 - v12) * dist[1] / (dist[1] - dist[2]);
+    if (t11 < t12)
+        return {t11, t12};
+    else
+        return {t12, t11};
+}
+
 bool test_triangles_intersection_3d(const Triangle& t1, const Triangle& t2) {
     if (t1.degenerate() || t2.degenerate()) {
         return false;
@@ -331,6 +344,13 @@ bool test_triangles_intersection_3d(const Triangle& t1, const Triangle& t2) {
     }
 
     Line intersection_line{plane1, plane2};
+    auto [min0, max0] = compute_interval(t1, intersection_line, {d1, d2, d3});
+    auto [min1, max1] = compute_interval(t2, intersection_line, {calc_signed_distance(plane1, t2.vertices[0]),
+        calc_signed_distance(plane1, t2.vertices[1]), calc_signed_distance(plane1, t2.vertices[2])});
 
-    return false;
+    if (max1 < min0 || max0 < min1) {
+        return false;
+    }
+
+    return true;
 }
