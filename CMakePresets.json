@@ -38,14 +38,14 @@
             "name": "Debug",
             "description": "",
             "displayName": "",
-            "configurePreset": "Debug GCC",
+            "configurePreset": "Debug",
             "jobs": 16
         },
         {
             "name": "Release",
             "description": "",
             "displayName": "",
-            "configurePreset": "Release GCC",
+            "configurePreset": "Release",
             "jobs": 16
         }
     ],
@@ -55,7 +55,7 @@
             "description": "",
             "displayName": "",
             "configurePreset": "Debug",
-            "output" : {
+            "output": {
                 "outputOnFailure": true
             }
         },
@@ -64,7 +64,7 @@
             "description": "",
             "displayName": "",
             "configurePreset": "Release",
-            "output" : {
+            "output": {
                 "outputOnFailure": true
             }
         }

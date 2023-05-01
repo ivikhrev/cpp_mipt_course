@@ -104,26 +104,6 @@ Line::Line(const Plane& plane1, const Plane& plane2) {
     } else {
         point = Vec3{std::nanf("x"), std::nanf("y"), std::nanf("z")};
     }
-    // TODO: fix straighforward variant
-    // if (direction == Vec3(0, 0, 0)) {
-    //     return;
-    // }
-    // float x, y, z;
-    // if (plane1.a > numeric_utils::epsilon) {
-    //     z = 0.f;
-    //     y = (-plane2.d + plane1.d * plane2.a / plane1.a) / (plane2.b - plane1.b * plane2.a / plane1.a);
-    //     x = (-plane1.d - plane1.b * y) / plane1.a;
-    // }
-    // else if (plane1.b > numeric_utils::epsilon) {
-    //     z = (-plane2.d + plane1.d * plane2.b / plane1.b) / (plane2.c - plane1.c * plane2.b / plane1.b);
-    //     y = (-plane1.d - plane1.c * z) / plane1.b;
-    //     x = 0.f;
-    // } else if (plane1.c > numeric_utils::epsilon) {
-    //     z = (-plane2.d + plane1.d * plane2.a / plane1.a) / (plane2.c - plane1.c * plane2.a / plane1.a);
-    //     y = 0.f;
-    //     x = (-plane1.d - plane1.c * z) / plane1.a;
-    // }
-    // point = {x, y, 0.f};
 }
 
 bool Triangle::operator==(const Triangle& other) const {
