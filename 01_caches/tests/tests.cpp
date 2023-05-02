@@ -1,6 +1,8 @@
 #include "lru.hpp"
 #include "lfu.hpp"
 
+#include <utils/tests_utils.hpp>
+
 #include <gtest/gtest.h>
 
 #include <fstream>
@@ -9,11 +11,10 @@
 #include <utility>
 
 namespace fs = std::filesystem;
-using str_pair = std::pair<std::string, std::string>;
 
-class BaseFixtureTests : public testing::TestWithParam<std::pair<std::string, std::string>> {
-protected:
-    const std::string& data_directory() {
+class CacheFixtureTests : public testing::TestWithParam<std::string> {
+public:
+    static const std::string& data_directory() {
         // Establish the directory name only once for the application.
         static const std::string data_dir = [] {
             // Look for an environment variable specifying the directory name.
@@ -30,12 +31,9 @@ protected:
         // Return the previously initialised variable.
         return data_dir;
     }
-
-
-    std::pair<int, std::vector<int>> read_input_data(const std::string& file_path_str) {
-        const fs::path file_path = fs::path(data_directory()) / file_path_str;
+protected:
+    std::pair<int, std::vector<int>> read_input_data(const fs::path& file_path) {
         std::ifstream file(file_path);
-        std::cout << "Current path is " << file_path << '\n';
         int cache_capacity, elements_number;
         std::vector<int> data;
         if (file.is_open()) {
@@ -51,12 +49,13 @@ protected:
         return {cache_capacity, data};
     }
 
-    int read_answer_data(const std::string& file_path_str) {
-        const fs::path file_path = fs::path(data_directory()) / file_path_str;
+    int read_answer_data(const fs::path& file_path) {
         std::ifstream file(file_path);
         int answer;
         if (file.is_open()) {
             file >> answer;
+        } else {
+            throw std::runtime_error("Can't open file" + file_path.string());
         }
 
         return answer;
@@ -77,24 +76,16 @@ protected:
     }
 };
 
-TEST_P(BaseFixtureTests, End2EndTest) {
-    auto [input_file, answer_file] = GetParam();
+TEST_P(CacheFixtureTests, LRUEnd2EndTest) {
+    auto input_file = fs::path(GetParam());
+    auto answer_file = input_file.parent_path() / "answers_lru" / input_file.filename();
     auto [capacity, input] = read_input_data(input_file);
     ASSERT_EQ(read_answer_data(answer_file), calc_hits_number<LRUCache>(capacity, input));
 }
 
 INSTANTIATE_TEST_SUITE_P(LRUCache,
-                         BaseFixtureTests,
-                         ::testing::Values(str_pair{"0.txt", "answers/0_answer.txt"},
-                         str_pair{"1.txt", "answers/1_answer.txt"},
-                         str_pair{"2.txt", "answers/2_answer.txt"},
-                         str_pair{"3.txt", "answers/3_answer.txt"},
-                         str_pair{"4.txt", "answers/4_answer.txt"},
-                         str_pair{"5.txt", "answers/5_answer.txt"},
-                         str_pair{"6.txt", "answers/6_answer.txt"},
-                         str_pair{"7.txt", "answers/7_answer.txt"},
-                         str_pair{"8.txt", "answers/8_answer.txt"},
-                         str_pair{"9.txt", "answers/9_answer.txt"})
+                         CacheFixtureTests,
+                         ::testing::ValuesIn(get_files_in_dir(CacheFixtureTests::data_directory()))
 );
 
 int main(int argc, char **argv) {
