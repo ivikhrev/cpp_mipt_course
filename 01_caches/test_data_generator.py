@@ -59,7 +59,6 @@ def perfect(data: list) -> int:
                     if idx.count(-1) > 0:
                         cache.pop(idx.index(-1))
                     else:
-                        print(idx)
                         cache.remove(data[max(idx)])
                 else:
                     cache = cache[:-1]
@@ -95,9 +94,10 @@ def main():
             f.write(str(data[-1]))
 
         for cache_algo in algos:
+            print(f"Calculate hits number for {cache_algo.__name__}")
             answer = cache_algo(data)
             answers_dir =  root_data_dir / "answers" /cache_algo.__name__
-            answers_dir.mkdir(parents=True)
+            answers_dir.mkdir(parents=True, exist_ok=True)
             with open(answers_dir / file_name, 'w+') as f:
                 f.write(str(answer))
     print(f"Test data files was written to {root_data_dir.resolve()}")

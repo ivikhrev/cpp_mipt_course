@@ -4,7 +4,7 @@
 class LRUCache {
 public:
     LRUCache() = default;
-    LRUCache(int capacity) :capacity(capacity) {};
+    LRUCache(int capacity) : capacity(capacity) {};
 
     bool full() const;
     int get(int key);

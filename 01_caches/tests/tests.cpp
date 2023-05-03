@@ -1,5 +1,6 @@
 #include "lru.hpp"
 #include "lfu.hpp"
+#include "perfect_cache.hpp"
 
 #include <utils/tests_utils.hpp>
 
@@ -39,6 +40,9 @@ protected:
         }
         else if constexpr (std::is_same<Cache, LFUCache>::value) {
             return "lfu";
+        }
+        else if constexpr (std::is_same<Cache, PerfectCache>::value) {
+            return "perfect";
         }
     }
 
@@ -89,6 +93,20 @@ protected:
     }
 };
 
+template<>
+int CacheFixtureTests<PerfectCache>::calc_hits_number(int capacity, const std::vector<int>& input) {
+    PerfectCache cache(capacity, input);
+    int hits = 0;
+    for (auto k : input) {
+        if (cache.get(k) != -1) {
+            ++hits;
+        } else {
+            cache.put(k, k);
+        }
+    }
+    return hits;
+}
+
 // alternative to constexpr
 // template<>
 // std::string CacheFixtureTests<LRUCache>::get_name() const {
@@ -108,14 +126,15 @@ TYPED_TEST_P(CacheFixtureTests, End2EndTest) {
         auto answer_file = input_file.parent_path() / "answers"/ this->get_name() / input_file.filename();
         auto [capacity, input] = this->read_input_data(input_file);
         ASSERT_EQ(this->read_answer_data(answer_file), this->calc_hits_number(capacity, input))
-            << "on input data: " << input_file;
+            << "on input data: " << input_file << '\n'
+            << "answer file: " << answer_file << '\n';
     }
 }
 
 REGISTER_TYPED_TEST_SUITE_P(CacheFixtureTests, End2EndTest);
 
-using Types = testing::Types<LRUCache>;
-INSTANTIATE_TYPED_TEST_SUITE_P(TestPrefix, CacheFixtureTests, Types);
+using Types = testing::Types<LRUCache, PerfectCache>;
+INSTANTIATE_TYPED_TEST_SUITE_P(Caches, CacheFixtureTests, Types);
 
 // Value parametrized tests, has more clear output, but can't be type parametrize.
 

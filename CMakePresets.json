@@ -39,7 +39,7 @@
             "description": "",
             "displayName": "",
             "configurePreset": "Debug",
-            "jobs": 16
+            "jobs": 1
         },
         {
             "name": "Release",
