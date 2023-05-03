@@ -117,6 +117,8 @@ REGISTER_TYPED_TEST_SUITE_P(CacheFixtureTests, End2EndTest);
 using Types = testing::Types<LRUCache>;
 INSTANTIATE_TYPED_TEST_SUITE_P(TestPrefix, CacheFixtureTests, Types);
 
+// Value parametrized tests, has more clear output, but can't be type parametrize.
+
 // TEST_P(CacheFixtureTests, LRUEnd2EndTest) {
 //     auto input_file = fs::path(GetParam());
 //     auto answer_file = input_file.parent_path() / "answers_lru" / input_file.filename();

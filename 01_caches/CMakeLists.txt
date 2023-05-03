@@ -7,4 +7,8 @@ add_target(NAME caches
            SOURCES ${SOURCES}
            HEADERS ${HEADERS}
            INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/include"
+           TEST_DATA_GENERATOR "${CMAKE_CURRENT_SOURCE_DIR}/test_data_generator.py"
+           GEN_CMD "-a" "lru"
+                "-n" "2"
+                "-d" "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_data"
            TEST_DATA_PATH "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_data")

@@ -10,9 +10,11 @@ include(CMakeParseArguments)
 include(CTest)
 include(GoogleTest)
 
+find_package(Python3 QUIET)
+
 macro(add_target)
-    set(oneValueArgs NAME MAIN TEST TEST_DATA_PATH)
-    set(multiValueArgs SOURCES HEADERS DEPENDENCIES INCLUDE_DIRECTORIES)
+    set(oneValueArgs NAME MAIN TEST TEST_DATA_PATH TEST_DATA_GENERATOR)
+    set(multiValueArgs SOURCES HEADERS DEPENDENCIES INCLUDE_DIRECTORIES GEN_CMD)
     cmake_parse_arguments(TARGET "${options}" "${oneValueArgs}"
                         "${multiValueArgs}" ${ARGN})
 
@@ -38,9 +40,43 @@ macro(add_target)
         PROPERTIES ENVIRONMENT
             TEST_DATA_PATH=${TARGET_TEST_DATA_PATH}
     )
+
     target_compile_definitions(${TEST_NAME}
         PRIVATE TEST_DATA_DIR="${TARGET_TEST_DATA_PATH}"
     )
+
+    if(TARGET_TEST_DATA_GENERATOR AND Python3_EXECUTABLE)
+        add_custom_target(
+            ${TEST_NAME}_generate_data
+            ALL
+            # DEPENDS
+            #     ${TARGET_TEST_DATA_PATH}/*
+        )
+
+        # enable pretty printing
+        string(REPLACE ";"  " " ARGS "${TARGET_GEN_CMD}")
+        add_custom_command(
+            # OUTPUT
+            #     ${TARGET_TEST_DATA_PATH}/*
+            TARGET
+                ${TEST_NAME}_generate_data
+            COMMAND
+                ${Python3_EXECUTABLE}
+                ${TARGET_TEST_DATA_GENERATOR}
+                ${TARGET_GEN_CMD}
+            DEPENDS
+                ${TARGET_TEST_DATA_GENERATOR}
+            COMMENT
+                "[generate data] ${TARGET_TEST_DATA_GENERATOR} ${ARGS}"
+            VERBATIM
+            COMMAND_EXPAND_LISTS
+        )
+        add_dependencies(${TEST_NAME} ${TEST_NAME}_generate_data)
+        set_property(TARGET ${TEST_NAME}_generate_data PROPERTY CMAKE_CXX_COMPILER_LAUNCHER"${CMAKE_COMMAND} -E time")
+
+    elseif(NOT Python3_EXECUTABLE)
+        message(WARNING "python3 executable not found. Can't generate test data, please generate in manually.")
+    endif()
 endmacro()
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)

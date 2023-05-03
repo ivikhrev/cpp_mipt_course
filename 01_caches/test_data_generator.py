@@ -39,23 +39,26 @@ def lru(data: list) -> int:
 
 def main():
     args = build_argparser().parse_args()
-    Path(args.dir).mkdir(parents=True, exist_ok=True)
-    prefix = args.dir + '/'
-    answers_dir =  prefix + '/answers_' + args.algo
-    Path(answers_dir).mkdir(parents=True, exist_ok=True)
+    root_data_dir = Path(args.dir)
+    answers_dir =  root_data_dir / "answers" /args.algo
+    answers_dir.mkdir(parents=True, exist_ok=True)
+    print("Start generating test data for caches...")
     if args.algo == 'lru':
         for i in range(args.number):
             data = generate_data(randint(1, 10000), randint(1, 1000000), randint(1, 1000)) #(cache_size=3, elems_number=5, upper_bound=6) #randint(1, 3), randint(1, 40), randint(3,10))
             answer = lru(data)
-
-            with open(prefix + str(i) + '.txt', 'w+') as f:
+            file_name = f"{str(i)}.txt";
+            with open(root_data_dir / file_name, 'w+') as f:
                 for el in data[:-1]:
                     f.write(str(el) + " ")
                 f.write(str(data[-1]))
 
-            with open(answers_dir + '/' + str(i) + '.txt', 'w+') as f:
+            with open(answers_dir / file_name, 'w+') as f:
                 f.write(str(answer))
-
+        print(f"Test data files was written to {root_data_dir.resolve()}")
+    else:
+        raise ValueError(f"Unknown alorithm was provided {args.algo}")
+    print("Done!")
 
 if __name__ == "__main__":
     main()
