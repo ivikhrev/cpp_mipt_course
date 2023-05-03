@@ -3,6 +3,7 @@
 from pathlib import Path
 from argparse import ArgumentParser
 from random import randrange, randint
+import shutil
 
 
 def build_argparser():
@@ -10,6 +11,9 @@ def build_argparser():
     parser.add_argument('-a', '--algo', required=True, help = 'Specify algorithm for generating test data')
     parser.add_argument('-d', '--dir', default='tests/test_data', help = 'Specify target directory')
     parser.add_argument('-n', '--number', type=int, default=10, help = 'Specify number of test cases to generate')
+    parser.add_argument('--cache_size', type=int, default=5, help = 'Specify cache size')
+    parser.add_argument('--elems_num', type=int, default=10, help = 'Specify number of input elements')
+    parser.add_argument('--upper_bound', type=int, default=10, help = 'Specify upper bound for input elements')
     return parser
 
 
@@ -36,29 +40,67 @@ def lru(data: list) -> int:
             cache.insert(0,i)
     return hits
 
+def perfect(data: list) -> int:
+    cache_size = data[0]
+    cache = []
+    data = data[2:]
+    hits = 0
+
+    for i, el in enumerate(data):
+        if el in cache:
+            hits += 1
+            if (i != cache[0]):
+                cache.remove(el)
+                cache.insert(0, el)
+        else:
+            if len(cache) == cache_size:
+                if (i < len(data) - 1):
+                    idx = [data.index(c, i + 1) if data[i + 1:].count(c) else -1 for c in cache]
+                    if idx.count(-1) > 0:
+                        cache.pop(idx.index(-1))
+                    else:
+                        print(idx)
+                        cache.remove(data[max(idx)])
+                else:
+                    cache = cache[:-1]
+            cache.insert(0, el)
+    return hits
+
 
 def main():
     args = build_argparser().parse_args()
     root_data_dir = Path(args.dir)
-    answers_dir =  root_data_dir / "answers" /args.algo
-    answers_dir.mkdir(parents=True, exist_ok=True)
-    print("Start generating test data for caches...")
-    if args.algo == 'lru':
-        for i in range(args.number):
-            data = generate_data(randint(1, 10000), randint(1, 1000000), randint(1, 1000)) #(cache_size=3, elems_number=5, upper_bound=6) #randint(1, 3), randint(1, 40), randint(3,10))
-            answer = lru(data)
-            file_name = f"{str(i)}.txt";
-            with open(root_data_dir / file_name, 'w+') as f:
-                for el in data[:-1]:
-                    f.write(str(el) + " ")
-                f.write(str(data[-1]))
+    if root_data_dir.exists():
+        shutil.rmtree(root_data_dir)
+    root_data_dir.mkdir(parents=True)
 
-            with open(answers_dir / file_name, 'w+') as f:
-                f.write(str(answer))
-        print(f"Test data files was written to {root_data_dir.resolve()}")
+    print("Start generating test data for caches...")
+
+    algos = []
+    if args.algo == 'lru':
+        algos = [lru]
+    elif args.algo == 'perfect':
+        algos = [perfect]
+    elif args.algo == 'all':
+        algos = [lru, perfect]
     else:
         raise ValueError(f"Unknown alorithm was provided {args.algo}")
-    print("Done!")
+
+    for i in range(args.number):
+        data = generate_data(randint(1, args.cache_size), randint(1, args.elems_num), randint(1, args.upper_bound))
+        file_name = f"{str(i)}.txt"
+        with open(root_data_dir / file_name, 'w+') as f:
+            for el in data[:-1]:
+                f.write(str(el) + " ")
+            f.write(str(data[-1]))
+
+        for cache_algo in algos:
+            answer = cache_algo(data)
+            answers_dir =  root_data_dir / "answers" /cache_algo.__name__
+            answers_dir.mkdir(parents=True)
+            with open(answers_dir / file_name, 'w+') as f:
+                f.write(str(answer))
+    print(f"Test data files was written to {root_data_dir.resolve()}")
 
 if __name__ == "__main__":
     main()
