@@ -12,6 +12,7 @@
 
 namespace fs = std::filesystem;
 
+template<class Cache>
 class CacheFixtureTests : public testing::TestWithParam<std::string> {
 public:
     static const std::string& data_directory() {
@@ -32,6 +33,19 @@ public:
         return data_dir;
     }
 protected:
+    std::string get_name() const {
+        if constexpr (std::is_same<Cache, LRUCache>::value) {
+            return "lru";
+        }
+        else if constexpr (std::is_same<Cache, LFUCache>::value) {
+            return "lfu";
+        }
+    }
+
+    // std::string get_name() const {
+    //     return "";
+    // }
+
     std::pair<int, std::vector<int>> read_input_data(const fs::path& file_path) {
         std::ifstream file(file_path);
         int cache_capacity, elements_number;
@@ -61,7 +75,6 @@ protected:
         return answer;
     }
 
-    template<class Cache>
     int calc_hits_number(int capacity, const std::vector<int>& input) {
         Cache cache(capacity);
         int hits = 0;
@@ -76,17 +89,45 @@ protected:
     }
 };
 
-TEST_P(CacheFixtureTests, LRUEnd2EndTest) {
-    auto input_file = fs::path(GetParam());
-    auto answer_file = input_file.parent_path() / "answers_lru" / input_file.filename();
-    auto [capacity, input] = read_input_data(input_file);
-    ASSERT_EQ(read_answer_data(answer_file), calc_hits_number<LRUCache>(capacity, input));
+// alternative to constexpr
+// template<>
+// std::string CacheFixtureTests<LRUCache>::get_name() const {
+//     return "lru";
+// }
+
+// template<>
+// std::string CacheFixtureTests<LFUCache>::get_name() const {
+//     return "lfu";
+// }
+
+TYPED_TEST_SUITE_P(CacheFixtureTests);
+
+TYPED_TEST_P(CacheFixtureTests, End2EndTest) {
+    for (auto file_str : get_files_in_dir(this->data_directory())) {
+        auto input_file = fs::path(file_str);
+        auto answer_file = input_file.parent_path() / "answers"/ this->get_name() / input_file.filename();
+        auto [capacity, input] = this->read_input_data(input_file);
+        ASSERT_EQ(this->read_answer_data(answer_file), this->calc_hits_number(capacity, input))
+            << "on input data: " << input_file;
+    }
 }
 
-INSTANTIATE_TEST_SUITE_P(LRUCache,
-                         CacheFixtureTests,
-                         ::testing::ValuesIn(get_files_in_dir(CacheFixtureTests::data_directory()))
-);
+REGISTER_TYPED_TEST_SUITE_P(CacheFixtureTests, End2EndTest);
+
+using Types = testing::Types<LRUCache>;
+INSTANTIATE_TYPED_TEST_SUITE_P(TestPrefix, CacheFixtureTests, Types);
+
+// TEST_P(CacheFixtureTests, LRUEnd2EndTest) {
+//     auto input_file = fs::path(GetParam());
+//     auto answer_file = input_file.parent_path() / "answers_lru" / input_file.filename();
+//     auto [capacity, input] = read_input_data(input_file);
+//     ASSERT_EQ(read_answer_data(answer_file), calc_hits_number<LRUCache>(capacity, input));
+// }
+
+// INSTANTIATE_TEST_SUITE_P(LRUCache,
+//                          CacheFixtureTests,
+//                          ::testing::ValuesIn(get_files_in_dir(CacheFixtureTests::data_directory()))
+// );
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
