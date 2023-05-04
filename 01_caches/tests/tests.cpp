@@ -133,7 +133,7 @@ TYPED_TEST_P(CacheFixtureTests, End2EndTest) {
 
 REGISTER_TYPED_TEST_SUITE_P(CacheFixtureTests, End2EndTest);
 
-using Types = testing::Types<LRUCache, PerfectCache>;
+using Types = testing::Types<LFUCache, LRUCache, PerfectCache>;
 INSTANTIATE_TYPED_TEST_SUITE_P(Caches, CacheFixtureTests, Types);
 
 // Value parametrized tests, has more clear output, but can't be type parametrize.

@@ -40,6 +40,30 @@ def lru(data: list) -> int:
             cache.insert(0,i)
     return hits
 
+
+def lfu(data: list) -> int:
+    cache_size = data[0]
+    cache = []
+    frequencies = {}
+    hits = 0
+    for i in data[2:]:
+        if i in cache:
+            hits += 1
+            frequencies[i] += 1
+        else:
+            if len(cache) == cache_size:
+                min_key = min(frequencies, key=frequencies.get)
+                cache.remove(min_key)
+                frequencies.pop(min_key)
+
+            if i in frequencies:
+                frequencies[i] += 1
+            else:
+                frequencies[i] = 1
+            cache.append(i)
+    return hits
+
+
 def perfect(data: list) -> int:
     cache_size = data[0]
     cache = []
@@ -84,10 +108,12 @@ def main():
     algos = []
     if args.algo == 'lru':
         algos = [lru]
+    elif args.algo == 'lfu':
+        algos = [lfu]
     elif args.algo == 'perfect':
         algos = [perfect]
     elif args.algo == 'all':
-        algos = [lru, perfect]
+        algos = [lru, perfect, lfu]
     else:
         raise ValueError(f"Unknown alorithm was provided {args.algo}")
 
