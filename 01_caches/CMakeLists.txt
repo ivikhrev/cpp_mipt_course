@@ -9,9 +9,9 @@ add_target(NAME caches
            INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/include"
            TEST_DATA_GENERATOR "${CMAKE_CURRENT_SOURCE_DIR}/test_data_generator.py"
            GEN_CMD "-a" "all"
-                "-n" "5"
+                "-n" "10"
                 "-d" "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_data"
                 "--cache_size" "50"
-                "--elems_num" "10000"
+                "--elems_num" "1000000"
                 "--upper_bound" "100"
            TEST_DATA_PATH "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_data")

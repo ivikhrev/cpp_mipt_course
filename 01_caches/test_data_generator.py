@@ -55,7 +55,13 @@ def perfect(data: list) -> int:
         else:
             if len(cache) == cache_size:
                 if (i < len(data) - 1):
-                    idx = [data.index(c, i + 1) if data[i + 1:].count(c) else -1 for c in cache]
+                    idx = []
+                    for c in cache:
+                        try:
+                            idx.append(data.index(c, i + 1))
+                        except ValueError:
+                            idx.append(-1)
+
                     if idx.count(-1) > 0:
                         cache.pop(idx.index(-1))
                     else:
