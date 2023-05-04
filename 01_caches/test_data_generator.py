@@ -94,7 +94,6 @@ def main():
             f.write(str(data[-1]))
 
         for cache_algo in algos:
-            print(f"Calculate hits number for {cache_algo.__name__}")
             answer = cache_algo(data)
             answers_dir =  root_data_dir / "answers" /cache_algo.__name__
             answers_dir.mkdir(parents=True, exist_ok=True)

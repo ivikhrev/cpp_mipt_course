@@ -1,7 +1,7 @@
 #include <unordered_map>
 #include <vector>
 #include <list>
-#include <queue>
+#include <set>
 
 // perfect cache structure that "knows" the future
 // therefore can implement perfect caching strategy -
@@ -23,6 +23,6 @@ private:
     std::unordered_map<int, ListIt> hash;
 
     std::unordered_map<int, std::list<int>> distances;
-    std::priority_queue<std::pair<int, int>> max_distances;
+    std::set<std::pair<int, int>> max_distances;
     int capacity;
 };

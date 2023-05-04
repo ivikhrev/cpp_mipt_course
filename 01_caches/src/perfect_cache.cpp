@@ -29,14 +29,12 @@ int PerfectCache::get(int key) {
     }
     auto elit = hit->second;
     move_front(elit);
+    max_distances.erase({distances[key].front(), key});
     distances[key].pop_front();
     if (distances[key].empty()) {
         distances[key].push_back(std::numeric_limits<int>::max());
     }
-    max_distances = std::priority_queue <std::pair<int, int>>();
-    for (auto [key, val] : cache) {
-        max_distances.push({distances[key].front(), key});
-    }
+    max_distances.emplace(distances[key].front(), key);
     return elit->second;
 }
 
@@ -45,8 +43,8 @@ void PerfectCache::put(int key, int value) {
     if (hit == -1) {
         if (full()) {
             // hash.erase(cache.back().first);
-            auto [distance, max_distance_key] = max_distances.top();
-            max_distances.pop();
+            auto [distance, max_distance_key] = *max_distances.rbegin();
+            max_distances.erase({distance, max_distance_key});
             cache.erase(hash[max_distance_key]);
             hash.erase(max_distance_key);
         }
@@ -58,7 +56,7 @@ void PerfectCache::put(int key, int value) {
         if (distances[key].empty()) {
             distances[key].push_back(std::numeric_limits<int>::max());
         }
-        max_distances.push({distances[key].front(), key});
+        max_distances.insert({distances[key].front(), key});
     } else {
         hash[key]->second = value;
     }
