@@ -10,7 +10,7 @@ def build_argparser():
     parser = ArgumentParser(add_help=False)
     parser.add_argument('-a', '--algo', required=True, help = 'Specify algorithm for generating test data')
     parser.add_argument('-d', '--dir', default='tests/test_data', help = 'Specify target directory')
-    parser.add_argument('-n', '--number', type=int, default=10, help = 'Specify number of test cases to generate')
+    parser.add_argument('-n', '--num', type=int, default=10, help = 'Specify number of test cases to generate')
     parser.add_argument('--cache_size', type=int, default=5, help = 'Specify cache size')
     parser.add_argument('--elems_num', type=int, default=10, help = 'Specify number of input elements')
     parser.add_argument('--upper_bound', type=int, default=10, help = 'Specify upper bound for input elements')
@@ -37,7 +37,7 @@ def lru(data: list) -> int:
         else:
             if len(cache) == cache_size:
                 cache = cache[:-1]
-            cache.insert(0,i)
+            cache.insert(0, i)
     return hits
 
 
@@ -49,18 +49,24 @@ def lfu(data: list) -> int:
     for i in data[2:]:
         if i in cache:
             hits += 1
+            if (i != cache[0]):
+                cache.remove(i)
+                cache.insert(0, i)
             frequencies[i] += 1
         else:
             if len(cache) == cache_size:
                 min_key = min(frequencies, key=frequencies.get)
-                cache.remove(min_key)
-                frequencies.pop(min_key)
+                all_min_keys = [k for k, v in frequencies.items() if v == frequencies[min_key]]
+                if len(all_min_keys) > 1:
+                    lru_min_idx = max([cache.index(k) for k in all_min_keys])
+                    frequencies.pop(cache[lru_min_idx])
+                    cache.pop(lru_min_idx)
+                else:
+                    cache.remove(min_key)
+                    frequencies.pop(min_key)
 
-            if i in frequencies:
-                frequencies[i] += 1
-            else:
-                frequencies[i] = 1
-            cache.append(i)
+            frequencies[i] = 1
+            cache.insert(0, i)
     return hits
 
 
@@ -117,7 +123,7 @@ def main():
     else:
         raise ValueError(f"Unknown alorithm was provided {args.algo}")
 
-    for i in range(args.number):
+    for i in range(args.num):
         data = generate_data(randint(1, args.cache_size), randint(1, args.elems_num), randint(1, args.upper_bound))
         file_name = f"{str(i)}.txt"
         with open(root_data_dir / file_name, 'w+') as f:

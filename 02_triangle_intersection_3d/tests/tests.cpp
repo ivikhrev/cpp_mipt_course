@@ -1,7 +1,15 @@
 #include "geom_structures.hpp"
 
+#include <utils/test_utils.hpp>
+
 #include <gtest/gtest.h>
 #include <cmath>
+#include <filesystem>
+#include <fstream>
+#include <vector>
+
+namespace fs = std::filesystem;
+
 namespace {
     const auto PI = std::acos(-1);
 }
@@ -522,6 +530,82 @@ TEST(TriangleIntersection3D, NonitersectingTrianglesIntersectingPlanesVerticesOn
         )
     );
 }
+
+class TriangleIntersections3DFixtureTests : public testing::TestWithParam<std::string> {
+public:
+    static const std::string& data_directory() {
+        // Establish the directory name only once for the application.
+        static const std::string data_dir = [] {
+            // Look for an environment variable specifying the directory name.
+            const char* env_dir = std::getenv("TEST_DATA_DIR");
+            if (env_dir == nullptr) {
+                // If an environment variable is not set, rely on the definition
+                // coming from the build system.
+                return std::string(TEST_DATA_DIR);
+            }
+            // Initialise the directory name using the environment variable.
+            return std::string(env_dir);
+        }();
+
+        // Return the previously initialised variable.
+        return data_dir;
+    }
+
+protected:
+    std::vector<Triangle> read_input_data(const fs::path& file_path) {
+        std::ifstream file(file_path);
+        int n;
+        int verts_num = 3, coords_num = 3;
+        std::vector<Triangle> triangles;
+        if (file.is_open()) {
+            file >> n;
+            for (int i = 0; i < n * verts_num * coords_num; ++i) {
+                std::vector<Vec3> v;
+                for (int j = 0; j < verts_num; ++j) {
+                    float x, y, z;
+                    file >> x >> y >> z;
+                    v.emplace_back(x, y, z);
+            }
+            triangles.emplace_back(v);
+        }
+        }
+        return triangles;
+    }
+
+    int read_answer_data(const fs::path& file_path) {
+        std::ifstream file(file_path);
+        int answer;
+        if (file.is_open()) {
+            file >> answer;
+        } else {
+            throw std::runtime_error("Can't open file" + file_path.string());
+        }
+
+        return answer;
+    }
+
+    int calc_intersections(const std::vector<Triangle>& triangles) {
+        int intersections_num = 0;
+        for (int i = 0; i < static_cast<int>(triangles.size()); ++i) {
+            for (int j = i + 1; j < static_cast<int>(triangles.size()); ++j) {
+                intersections_num += test_triangles_intersection_3d(triangles[i], triangles[j]);
+            }
+        }
+        return intersections_num;
+    }
+};
+
+TEST_P(TriangleIntersections3DFixtureTests, End2EndTest) {
+    auto input_file = fs::path(GetParam());
+    auto answer_file = input_file.parent_path() / "answers" / input_file.filename();
+    auto triangles = read_input_data(input_file);
+    ASSERT_EQ(0, calc_intersections(triangles));
+}
+
+INSTANTIATE_TEST_SUITE_P(TriangleIntersections,
+                         TriangleIntersections3DFixtureTests,
+                         ::testing::ValuesIn(get_files_in_dir(TriangleIntersections3DFixtureTests::data_directory()))
+);
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);

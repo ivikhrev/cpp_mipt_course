@@ -2,7 +2,7 @@
 #include "lfu.hpp"
 #include "perfect_cache.hpp"
 
-#include <utils/tests_utils.hpp>
+#include <utils/test_utils.hpp>
 
 #include <gtest/gtest.h>
 
