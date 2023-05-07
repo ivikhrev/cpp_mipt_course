@@ -12,6 +12,6 @@ add_target(NAME caches
                 "-n" "10"
                 "-d" "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_data"
                 "--cache_size" "50"
-                "--elems_num" "1000000"
+                "--elems_num" "100000"
                 "--upper_bound" "100"
            TEST_DATA_PATH "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_data")

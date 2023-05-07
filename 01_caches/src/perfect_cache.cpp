@@ -2,6 +2,7 @@
 
 #include "lru.hpp"
 
+#include <limits>
 #include <queue>
 
 PerfectCache::PerfectCache(int capacity, const std::vector<int>& keys) : capacity(capacity) {
