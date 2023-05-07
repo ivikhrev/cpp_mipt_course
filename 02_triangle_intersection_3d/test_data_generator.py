@@ -24,7 +24,6 @@ def generate_data(triangles_num: int) -> list:
     return data
 
 
-
 # def intersect_line_triangle(q1,q2,p1,p2,p3):
 #     def signed_tetra_volume(a,b,c,d):
 #         return np.sign(np.dot(np.cross(b-a,c-a),d-a)/6.0)
