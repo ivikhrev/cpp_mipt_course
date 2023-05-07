@@ -279,6 +279,8 @@ std::pair<float, float> compute_interval(const Triangle& t, const Line& l, const
         return {t1, t0};
 }
 
+// Paper http://web.stanford.edu/class/cs277/resources/papers/Moller1997b.pdf
+// https://github.dev/erich666/jgt-code/blob/e67d05e4398c737abc40744cf3984c64b7df1e84/Volume_02/Number_2/Moller1997b/tritri_isectline.c
 bool test_triangles_intersection_3d(const Triangle& t1, const Triangle& t2) {
     if (t1.degenerate() || t2.degenerate()) {
         return false;
