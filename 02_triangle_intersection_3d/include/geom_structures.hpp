@@ -14,7 +14,7 @@ struct Vec3 {
     Vec3(float x, float y, float z) : x(x), y(y), z(z) {}
 
     bool valid() const;
-    bool normalized() const;
+    bool is_normalized() const;
 
     bool operator==(const Vec3& other) const;
     bool operator!=(const Vec3& other) const;
@@ -26,9 +26,26 @@ struct Vec3 {
     Vec3 operator*(int f) const;
     Vec3 operator/(int d) const;
 
+    float operator[](std::size_t idx) {
+        if (idx == 0)
+            return x;
+        if (idx == 1)
+            return y;
+        return z;
+    }
+
+    const float operator[](std::size_t idx) const {
+        if (idx == 0)
+            return x;
+        if (idx == 1)
+            return y;
+        return z;
+    }
+
     float len() const;
     float len_squared() const;
-    void normalize();
+    Vec3 normalize();
+    int max_idx() const;
 
     friend std::ostream& operator<<(std::ostream& os, const Vec3& v) {
         return os << v.x << " " << v.y << " " << v.z;

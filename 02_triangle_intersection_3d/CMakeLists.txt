@@ -9,5 +9,6 @@ add_target(NAME triangle_intersection_3d
            INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/include"
            TEST_DATA_GENERATOR "${CMAKE_CURRENT_SOURCE_DIR}/test_data_generator.py"
            GEN_CMD "-n" "10"
+               "-t" "1000"
                 "-d" "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_data"
            TEST_DATA_PATH "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_data")

@@ -58,8 +58,6 @@ macro(add_target)
         add_custom_command(
             OUTPUT
                 ${TARGET_TEST_DATA_PATH}/0.txt
-            # TARGET
-            #     ${TEST_NAME}_generate_data
             COMMAND
                 ${Python3_EXECUTABLE}
                 ${TARGET_TEST_DATA_GENERATOR}

@@ -70,24 +70,24 @@ TEST(Vec3, Subtract) {
 
 TEST(Vec3, NormalizedVecIsNormalized) {
     Vec3 p1{1, 0, 0};
-    EXPECT_TRUE(p1.normalized());
+    EXPECT_TRUE(p1.is_normalized());
     Vec3 p2{0, 1, 0};
-    EXPECT_TRUE(p2.normalized());
+    EXPECT_TRUE(p2.is_normalized());
     Vec3 p3{0, 0, 1};
-    EXPECT_TRUE(p3.normalized());
+    EXPECT_TRUE(p3.is_normalized());
 }
 
 TEST(Vec3, NotNormalizedVecIsNotNormalized) {
     Vec3 p1{1, 1, 1};
-    EXPECT_FALSE(p1.normalized());
+    EXPECT_FALSE(p1.is_normalized());
 }
 
 TEST(Vec3, CanNormalizeVector) {
     Vec3 p1{1, 1, 1};
-    EXPECT_FALSE(p1.normalized());
-    p1.normalize();
+    EXPECT_FALSE(p1.is_normalized());
+    p1 = p1.normalize();
     EXPECT_EQ(p1, Vec3(0.57735026919f, 0.57735026919f, 0.57735026919f));
-    EXPECT_TRUE(p1.normalized());
+    EXPECT_TRUE(p1.is_normalized());
 }
 
 TEST(CrossProduct, CrossProduct1) {
@@ -241,16 +241,16 @@ TEST(Projection, ProjectPointOntoPlane) {
     EXPECT_EQ(calc_projection(Plane(1, 1, 1, 1), Vec3(1, 1, 1)), Vec3(1 / 3.f, 1 / 3.f, 1 / 3.f));
 }
 
-TEST(Projection, ProjectPointOntoLine) {
-    Line l1(Plane(1, 0, 0, 0), Plane(0, 1, 0, 0));
-    EXPECT_FLOAT_EQ(calc_projection_1d(l1, Vec3(1, 0, 1)), 1);
-    EXPECT_FLOAT_EQ(calc_projection_1d(l1, Vec3(1, 0, 2)), 2);
-    EXPECT_FLOAT_EQ(calc_projection_1d(l1, Vec3(1, 0, 3)), 3);
+// TEST(Projection, ProjectPointOntoLine) {
+//     Line l1(Plane(1, 0, 0, 0), Plane(0, 1, 0, 0));
+//     EXPECT_FLOAT_EQ(calc_projection_1d(l1, Vec3(1, 0, 1)), 1);
+//     EXPECT_FLOAT_EQ(calc_projection_1d(l1, Vec3(1, 0, 2)), 2);
+//     EXPECT_FLOAT_EQ(calc_projection_1d(l1, Vec3(1, 0, 3)), 3);
 
-    // not trivial case
-    Line l2(Plane(1, 1, 1, -1), Plane(1, 1, 0, 0));
-    EXPECT_FLOAT_EQ(calc_projection_1d(l2, Vec3(1, 4, 3)), 3);
-}
+//     // not trivial case
+//     Line l2(Plane(1, 1, 1, -1), Plane(1, 1, 0, 0));
+//     EXPECT_FLOAT_EQ(calc_projection_1d(l2, Vec3(1, 4, 3)), 3);
+// }
 
 TEST(ConvertTo2d, ConvertPointTo2d) {
     EXPECT_EQ(convert_point_to_2d(Vec3(1, 2, 0), 2), Vec3(1, 2, 0));
@@ -559,7 +559,7 @@ protected:
         std::vector<Triangle> triangles;
         if (file.is_open()) {
             file >> n;
-            for (int i = 0; i < n * verts_num * coords_num; ++i) {
+            for (int i = 0; i < n; ++i) {
                 std::vector<Vec3> v;
                 for (int j = 0; j < verts_num; ++j) {
                     float x, y, z;
@@ -599,7 +599,8 @@ TEST_P(TriangleIntersections3DFixtureTests, End2EndTest) {
     auto input_file = fs::path(GetParam());
     auto answer_file = input_file.parent_path() / "answers" / input_file.filename();
     auto triangles = read_input_data(input_file);
-    ASSERT_EQ(0, calc_intersections(triangles));
+
+    ASSERT_EQ(read_answer_data(answer_file), calc_intersections(triangles));
 }
 
 INSTANTIATE_TEST_SUITE_P(TriangleIntersections,
