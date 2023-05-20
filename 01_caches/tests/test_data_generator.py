@@ -9,7 +9,7 @@ import shutil
 def build_argparser():
     parser = ArgumentParser(add_help=False)
     parser.add_argument('-a', '--algo', required=True, help = 'Specify algorithm for generating test data')
-    parser.add_argument('-d', '--dir', default='tests/test_data', help = 'Specify target directory')
+    parser.add_argument('-d', '--dir', default='test_data', help = 'Specify target directory')
     parser.add_argument('-n', '--num', type=int, default=10, help = 'Specify number of test cases to generate')
     parser.add_argument('--cache_size', type=int, default=5, help = 'Specify cache size')
     parser.add_argument('--elems_num', type=int, default=10, help = 'Specify number of input elements')

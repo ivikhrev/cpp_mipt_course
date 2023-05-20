@@ -9,7 +9,7 @@ import shutil
 
 def build_argparser():
     parser = ArgumentParser(add_help=False)
-    parser.add_argument('-d', '--dir', default='tests/test_data', help = 'Specify target directory')
+    parser.add_argument('-d', '--dir', default='test_data', help = 'Specify target directory')
     parser.add_argument('-n', '--num', type=int, default=10, help = 'Specify number of test cases to generate')
     parser.add_argument('-t', '--triangles_num', type=int, default=10, help = 'Specify upper bound for number of triangles')
     return parser
@@ -22,24 +22,6 @@ def generate_data(triangles_num: int) -> list:
     for _ in range(triangles_num * points_num * coords_num):
         data.append(uniform(-10, 10))
     return data
-
-
-# def intersect_line_triangle(q1,q2,p1,p2,p3):
-#     def signed_tetra_volume(a,b,c,d):
-#         return np.sign(np.dot(np.cross(b-a,c-a),d-a)/6.0)
-
-#     s1 = signed_tetra_volume(q1,p1,p2,p3)
-#     s2 = signed_tetra_volume(q2,p1,p2,p3)
-
-#     if s1 != s2:
-#         s3 = signed_tetra_volume(q1,q2,p1,p2)
-#         s4 = signed_tetra_volume(q1,q2,p2,p3)
-#         s5 = signed_tetra_volume(q1,q2,p3,p1)
-#         if s3 == s4 and s4 == s5:
-#             n = np.cross(p2-p1,p3-p1)
-#             t = -np.dot(q1,n-p1) / np.dot(q1,q2-q1)
-#             return True #q1 + t * (q2-q1)
-#     return False
 
 
 def signed_volume(a, b, c, d):
@@ -95,19 +77,6 @@ def intersections_triangle_3d(data: list):
             triangle1 = np.array([[p11], [p12], [p13]])
             segments_t1 = np.array([[p11, p12, p13], [p12, p13, p11]])
             triangle2 = np.array([[p21], [p22], [p23]])
-
-            # res = intersect_segment_triangle(np.array([[p21], [p22]]),
-            #     np.array([[p11], [p12], [p13]]))
-            # res = intersect_segment_triangle(np.array([[p22], [p23]]),
-            #     np.array([[p11], [p12], [p13]]))
-            # res = intersect_segment_triangle(np.array([[p23], [p21]]),
-            #     np.array([[p11], [p12], [p13]]))
-            # res = intersect_segment_triangle(np.array([[p11], [p12]]),
-            #     np.array([[p21], [p22], [p23]]))
-            # res = intersect_segment_triangle(np.array([[p12], [p13]]),
-            #     np.array([[p21], [p22], [p23]]))
-            # res = intersect_segment_triangle(np.array([[p13], [p11]]),
-            #     np.array([[p21], [p22], [p23]]))
 
             if any(intersect_segment_triangle(segments_t2, triangle1)) or any(intersect_segment_triangle(segments_t1, triangle2)):
                 intersections_num += 1
