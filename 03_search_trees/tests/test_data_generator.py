@@ -90,7 +90,7 @@ def main():
             for el in answer[:-1]:
                 f.write(str(el) + " ")
             f.write(str(answer[-1]))
-    print(f"Test data files was written to {root_data_dir.resolve()}")
+    print(f"Test data files were written to {root_data_dir.resolve()}")
 
 if __name__ == "__main__":
     main()

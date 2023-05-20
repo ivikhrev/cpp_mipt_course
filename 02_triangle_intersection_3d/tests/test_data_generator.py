@@ -111,7 +111,7 @@ def main():
         answers_dir.mkdir(parents=True, exist_ok=True)
         with open(answers_dir / file_name, 'w+') as f:
             f.write(str(answer))
-    print(f"Test data files was written to {root_data_dir.resolve()}")
+    print(f"Test data files were written to {root_data_dir.resolve()}")
 
 if __name__ == "__main__":
     main()
