@@ -115,8 +115,6 @@ void AVLTree<T>::insert(T key) {
         curr_node = curr_node->left;
     }
     rebalance(curr_node);
-    // update_nodes_heights(curr_node);
-    // update_nodes_subtree_count(curr_node);
 }
 
 template<class T>
@@ -174,11 +172,6 @@ void AVLTree<T>::right_rotate(Node<T>* node) {
             parent->right->right = node;
             node->parent = parent->right;
         }
-
-        // node->update_height();
-        // node->update_subtree_count();
-        // node->parent->update_height();
-        // node->parent->update_subtree_count();
         update_nodes_heights(node);
         update_nodes_subtree_count(node);
     } else {
@@ -202,11 +195,8 @@ void AVLTree<T>::right_rotate(Node<T>* node) {
 
         update_nodes_heights(old_parent);
         update_nodes_subtree_count(old_parent);
-        // old_parent->update_height();
-        // old_parent->update_subtree_count();
+
         root = new_parent;
-        // root->update_height();
-        // root->update_subtree_count();
         update_nodes_heights(root);
         update_nodes_subtree_count(root);
     }
@@ -244,15 +234,6 @@ void AVLTree<T>::left_rotate(Node<T>* node) {
             parent->left->left = node;
             node->parent = parent->left;
         }
-
-
-        // // make old parent new left
-        // parent->right->left = node;
-        // node->parent = parent->right;
-        // node->update_height();
-        // node->update_subtree_count();
-        // node->parent->update_height();
-        // node->parent->update_subtree_count();
         update_nodes_heights(node);
         update_nodes_subtree_count(node);
     } else {
@@ -276,13 +257,10 @@ void AVLTree<T>::left_rotate(Node<T>* node) {
 
         update_nodes_heights(old_parent);
         update_nodes_subtree_count(old_parent);
-        // old_parent->update_height();
-        // old_parent->update_subtree_count();
+
         root = new_parent;
         update_nodes_heights(root);
         update_nodes_subtree_count(root);
-        // root->update_height();
-        // root->update_subtree_count();
     }
 }
 
