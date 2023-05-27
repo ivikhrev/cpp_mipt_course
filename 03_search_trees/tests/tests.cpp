@@ -1,5 +1,6 @@
 // #include "node.hpp"
 #include "avl_tree.hpp"
+#include "common.hpp"
 
 #include <utils/test_utils.hpp>
 
@@ -11,16 +12,16 @@
 
 namespace fs = std::filesystem;
 
-// TEST(Node, CanConstructWithKeyParameter) {
-//     ASSERT_NO_THROW((Node{0}));
-// }
+TEST(Node, CanConstructWithParameters) {
+    ASSERT_NO_THROW((Node<int>{0, 0, 0}));
+}
 
-// TEST(Node, CanConstructWithAllParameters) {
-//     Node<int> parent{0};
-//     Node<int> left{1};
-//     Node<int> right{2};
-//     ASSERT_NO_THROW((Node<int>{0, &parent, &left, &right}));
-// }
+TEST(Node, CanConstructWithAllParameters) {
+    Node<int> parent{0};
+    Node<int> left{1};
+    Node<int> right{2};
+    ASSERT_NO_THROW((Node<int>{0, &parent, &left, &right}));
+}
 
 TEST(AVLTree, CanDefaultConstruct) {
     ASSERT_NO_THROW((AVLTree<int>{}));
@@ -38,6 +39,41 @@ TEST(AVLTree, InorderTraversal) {
     ASSERT_EQ(expected, t.inorder_traversal());
 }
 
+TEST(AVLTree, CanCopy) {
+    auto t = AVLTree<int>({1, 2, 3, 4, 5});
+    auto copy = t;
+    ASSERT_EQ(t.inorder_traversal(), copy.inorder_traversal());
+}
+
+TEST(AVLTree, TrueDeepCopy) {
+    auto t = AVLTree<int>({1, 2, 4, 5});
+    auto copy = t;
+    ASSERT_EQ(t.inorder_traversal(), copy.inorder_traversal());
+    t.insert(3);
+    copy.insert(3);
+    ASSERT_EQ(t.inorder_traversal(), copy.inorder_traversal());
+}
+
+TEST(AVLTree, CopyCorrectKmin) {
+    auto t = AVLTree<int>({1, 2, 3, 4, 5});
+    auto copy = t;
+    ASSERT_EQ(t.kmin(1), copy.kmin(1));
+    ASSERT_EQ(t.kmin(2), copy.kmin(2));
+    ASSERT_EQ(t.kmin(3), copy.kmin(3));
+    ASSERT_EQ(t.kmin(4), copy.kmin(4));
+    ASSERT_EQ(t.kmin(5), copy.kmin(5));
+}
+
+TEST(AVLTree, CopyCorrectLessCount) {
+    auto t = AVLTree<int>({1, 2, 3, 4, 5});
+    auto copy = t;
+    ASSERT_EQ(t.less_count(1), copy.less_count(1));
+    ASSERT_EQ(t.less_count(2), copy.less_count(2));
+    ASSERT_EQ(t.less_count(3), copy.less_count(3));
+    ASSERT_EQ(t.less_count(4), copy.less_count(4));
+    ASSERT_EQ(t.less_count(5), copy.less_count(5));
+}
+
 TEST(AVLTree, LeftRotateRoot) {
     std::vector<int> v{1, 2, 3};
     std::vector<int> expected{1, 2, 3};
@@ -52,13 +88,6 @@ TEST(AVLTree, LeftRotate) {
     ASSERT_EQ(expected, t.inorder_traversal());
 }
 
-// TEST(AVLTree, LeftRotate2) {
-//     std::vector<int> v{2, 5, 1, 3, 4};
-//     std::vector<int> expected{1, 2, 3, 4, 5};
-//     auto t = AVLTree<int>(v);
-//     ASSERT_EQ(expected, t.inorder_traversal());
-// }
-
 TEST(AVLTree, RightRotateRoot) {
     std::vector<int> v{3, 2, 1};
     std::vector<int> expected{1, 2, 3};
@@ -72,13 +101,6 @@ TEST(AVLTree, RightRotate) {
     auto t = AVLTree<int>(v);
     ASSERT_EQ(expected, t.inorder_traversal());
 }
-
-// TEST(AVLTree, RightRotate2) {
-//     std::vector<int> v{4, 5, 3, 2, 1};
-//     std::vector<int> expected{1, 2, 3, 4, 5};
-//     auto t = AVLTree<int>(v);
-//     ASSERT_EQ(expected, t.inorder_traversal());
-// }
 
 TEST(AVLTree, LeftRightRotate) {
     std::vector<int> v{3, 1, 2};
@@ -113,6 +135,42 @@ TEST(AVLTree, TreeConstruct) {
     std::vector<int> expected{1, 3, 5, 6, 7 , 9};
     auto t = AVLTree<int>(v);
     ASSERT_EQ(expected, t.inorder_traversal());
+}
+
+TEST(AVLTree, Insert) {
+    std::vector<int> v{5, 1, 7, 6, 9, 3};
+    std::vector<int> expected{1, 2, 3, 5, 6, 7 , 9};
+    auto t = AVLTree<int>(v);
+    t.insert(2);
+    ASSERT_EQ(expected, t.inorder_traversal());
+}
+
+TEST(AVLTree, Find) {
+    std::vector<int> v{5, 1, 7, 6, 9, 3};
+    auto t = AVLTree<int>(v);
+    ASSERT_EQ(1, t.find(1)->key);
+    ASSERT_EQ(nullptr, t.find(2));
+    ASSERT_EQ(3, t.find(3)->key);
+    ASSERT_EQ(nullptr, t.find(4));
+    ASSERT_EQ(5, t.find(5)->key);
+    ASSERT_EQ(6, t.find(6)->key);
+    ASSERT_EQ(7, t.find(7)->key);
+    ASSERT_EQ(9, t.find(9)->key);
+}
+
+TEST(AVLTree, FindAfterFind) {
+    std::vector<int> v{5, 1, 7, 6, 9, 3};
+    auto t = AVLTree<int>(v);
+    ASSERT_EQ(1, t.find(1)->key);
+    ASSERT_EQ(nullptr, t.find(2));
+    ASSERT_EQ(3, t.find(3)->key);
+    ASSERT_EQ(nullptr, t.find(4));
+    ASSERT_EQ(5, t.find(5)->key);
+    ASSERT_EQ(6, t.find(6)->key);
+    ASSERT_EQ(7, t.find(7)->key);
+    ASSERT_EQ(9, t.find(9)->key);
+    t.insert(2);
+    ASSERT_EQ(2, t.find(2)->key);
 }
 
 TEST(AVLTree, KthMin) {

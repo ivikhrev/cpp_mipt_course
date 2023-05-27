@@ -6,8 +6,9 @@ template<class T>
 struct Node {
     const T key; // ?
 
-    Node(T key, Node* parent = nullptr, Node* left = nullptr, Node* right = nullptr) : key(key), parent(parent),
-        left(left), right(right) {
+    Node(T key, Node* parent = nullptr, Node* left = nullptr, Node* right = nullptr, int height = 0,
+        int subtree_nodes_count = 0) : key(key), parent(parent),
+        left(left), right(right), height(height), subtree_nodes_count(subtree_nodes_count) {
         if (left != nullptr && right != nullptr) {
             height = std::max(left->height, right->height) + 1;
             subtree_nodes_count = left->subtree_nodes_count + right->subtree_nodes_count + 2;
@@ -21,11 +22,12 @@ struct Node {
             height = right->height + 1;
             subtree_nodes_count = right->subtree_nodes_count + 1;
             right->parent = this;
-        } else {
-            height = 0;
-            subtree_nodes_count = 0;
         }
     }
+
+    Node(T key, int height, int subtree_nodes_count) : key(key), parent(nullptr), left(nullptr), right(nullptr),
+        height(height), subtree_nodes_count(subtree_nodes_count) {}
+
 
     int nodes_count() const {
         return subtree_nodes_count;

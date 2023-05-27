@@ -1,5 +1,6 @@
 #pragma once
 #include "node.hpp"
+#include "common.hpp"
 
 #include <cassert>
 #include <memory>
@@ -10,8 +11,9 @@
 template<class T>
 class AVLTree {
 public:
-    AVLTree() {}
+    AVLTree() = default;
     AVLTree(const std::vector<T>& data);
+    AVLTree(const AVLTree<T>& other);
     ~AVLTree();
 
     void insert(T key);
@@ -31,6 +33,7 @@ private:
     void right_rotate(Node<T>* node);
     void left_right_rotate(Node<T>* node);
     void right_left_rotate(Node<T>* node);
+    void delete_nodes();
 };
 
 template<class T>
@@ -41,29 +44,45 @@ AVLTree<T>::AVLTree(const std::vector<T>& data) {
 }
 
 template<class T>
+AVLTree<T>::AVLTree(const AVLTree<T>& other) {
+    // preorder traversal (root, left, right)
+    if (other.root != nullptr) {
+        std::stack<Node<T>*> s_orig, s_copy;
+        root = new Node<T>(other.root->key, other.root->height, other.root->subtree_nodes_count);
+        s_copy.push(root);
+        s_orig.push(other.root);
+        while (!s_orig.empty()) {
+            auto* ocurr = s_orig.top();
+            auto* ccurr = s_copy.top();
+            s_orig.pop();
+            s_copy.pop();
+            if (ocurr->right != nullptr) {
+                s_orig.push(ocurr->right);
+                ccurr->right = new Node<T>(ocurr->right->key, ccurr, nullptr, nullptr,
+                    ocurr->right->height, ocurr->right->subtree_nodes_count);
+                s_copy.push(ccurr->right);
+            }
+            if (ocurr->left != nullptr) {
+                s_orig.push(ocurr->left);
+                ccurr->left = new Node<T>(ocurr->left->key, ccurr, nullptr, nullptr,
+                    ocurr->left->height, ocurr->left->subtree_nodes_count);
+                s_copy.push(ccurr->left);
+            }
+        }
+    }
+}
+
+template<class T>
+void AVLTree<T>::delete_nodes() {
+    auto nodes = postorder_traversal(root);
+    for (auto& n : nodes) {
+        delete n;
+    }
+}
+
+template<class T>
 AVLTree<T>::~AVLTree() {
-    std::stack<Node<T>*> s1, s2;
-    if (root) {
-        s1.push(root);
-    }
-
-    while (!s1.empty()) {
-        auto* parent = s1.top();
-        s1.pop();
-        s2.push(parent);
-        if (parent->left) {
-            s1.push(parent->left);
-        }
-
-        if (parent->right) {
-            s1.push(parent->right);
-        }
-    }
-
-    while (!s2.empty()) {
-        delete s2.top();
-        s2.pop();
-    }
+    delete_nodes();
 }
 
 template<class T>
@@ -82,6 +101,23 @@ void AVLTree<T>::update_nodes_subtree_count(Node<T>* node) {
         parent->update_subtree_count();
         parent = parent->parent;
     }
+}
+
+template<class T>
+Node<T>* AVLTree<T>::find(T key) const {
+    Node<T>* curr_node = root;
+    while(curr_node != nullptr) {
+        if (curr_node->key == key) {
+            return curr_node;
+        }
+        if (key > curr_node->key) {
+            curr_node = curr_node->right;
+        } else {
+            curr_node = curr_node->left;
+        }
+    }
+
+    return nullptr;
 }
 
 template<class T>
@@ -266,21 +302,11 @@ void AVLTree<T>::left_rotate(Node<T>* node) {
 
 template<class T>
 std::vector<T> AVLTree<T>::inorder_traversal() const {
-    std::stack<Node<T>*> s;
-    std::vector<T> data;
-    Node<T>* curr = root;
-    while (curr != nullptr || !s.empty()) {
-        while(curr) {
-            s.push(curr);
-            curr = curr->left;
-        }
-        curr = s.top();
-        s.pop();
-        data.push_back(curr->key);
-        curr = curr->right;
-    }
-
-    return data;
+    std::vector<T> inorder_data;
+    auto inorder_nodes = inorder_traversal_(root);
+    std::transform(inorder_nodes.cbegin(), inorder_nodes.cend(),
+        std::back_inserter(inorder_data), [](const Node<T>* n) {return n->key;});
+    return inorder_data;
 }
 
 template<class T>
