@@ -10,24 +10,16 @@ struct Node {
         int subtree_nodes_count = 0) : key(key), parent(parent),
         left(left), right(right), height(height), subtree_nodes_count(subtree_nodes_count) {
         if (left != nullptr && right != nullptr) {
-            height = std::max(left->height, right->height) + 1;
-            subtree_nodes_count = left->subtree_nodes_count + right->subtree_nodes_count + 2;
             left->parent = this;
             right->parent = this;
         } else if (left != nullptr) {
-            height = left->height + 1;
-            subtree_nodes_count = left->subtree_nodes_count + 1;
             left->parent = this;
         } else if (right != nullptr){
-            height = right->height + 1;
-            subtree_nodes_count = right->subtree_nodes_count + 1;
             right->parent = this;
         }
+        update_height();
+        update_subtree_count();
     }
-
-    Node(T key, int height, int subtree_nodes_count) : key(key), parent(nullptr), left(nullptr), right(nullptr),
-        height(height), subtree_nodes_count(subtree_nodes_count) {}
-
 
     int nodes_count() const {
         return subtree_nodes_count;

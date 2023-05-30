@@ -3,10 +3,10 @@
 #include <stack>
 
 template<class Node>
-std::vector<Node> inorder_traversal_(Node root) {
-    std::stack<Node> s;
-    std::vector<Node> inorder_nodes;
-    Node curr = root;
+std::vector<Node*> inorder_traversal(Node* root) {
+    std::stack<Node*> s;
+    std::vector<Node*> inorder_nodes;
+    Node* curr = root;
     while (curr != nullptr || !s.empty()) {
         while(curr) {
             s.push(curr);
@@ -22,7 +22,7 @@ std::vector<Node> inorder_traversal_(Node root) {
 }
 
 template<class Node>
-std::vector<Node*> preorder_traversal(const Node*& root) {
+std::vector<Node*> preorder_traversal(Node* root) {
     std::stack<Node*> s;
     std::vector<Node*> preorder_nodes;
     Node* curr = root;
@@ -42,7 +42,7 @@ std::vector<Node*> preorder_traversal(const Node*& root) {
 }
 
 template<class Node>
-std::vector<Node*> postorder_traversal(Node*& root) {
+std::vector<Node*> postorder_traversal(Node* root) {
     std::stack<Node*> s1, s2;
     if (root) {
         s1.push(root);

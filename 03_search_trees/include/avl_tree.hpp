@@ -23,7 +23,7 @@ public:
     int kmin(int k) const;
     int less_count(int k) const;
 
-    std::vector<T> inorder_traversal() const;
+    std::vector<T> inorder_keys() const;
 private:
     Node<T>* root = nullptr;
     void rebalance(Node<T>* node);
@@ -48,7 +48,7 @@ AVLTree<T>::AVLTree(const AVLTree<T>& other) {
     // preorder traversal (root, left, right)
     if (other.root != nullptr) {
         std::stack<Node<T>*> s_orig, s_copy;
-        root = new Node<T>(other.root->key, other.root->height, other.root->subtree_nodes_count);
+        root = new Node<T>(other.root->key, nullptr, nullptr, nullptr, other.root->height, other.root->subtree_nodes_count);
         s_copy.push(root);
         s_orig.push(other.root);
         while (!s_orig.empty()) {
@@ -301,9 +301,9 @@ void AVLTree<T>::left_rotate(Node<T>* node) {
 }
 
 template<class T>
-std::vector<T> AVLTree<T>::inorder_traversal() const {
+std::vector<T> AVLTree<T>::inorder_keys() const {
     std::vector<T> inorder_data;
-    auto inorder_nodes = inorder_traversal_(root);
+    auto inorder_nodes = inorder_traversal(root);
     std::transform(inorder_nodes.cbegin(), inorder_nodes.cend(),
         std::back_inserter(inorder_data), [](const Node<T>* n) {return n->key;});
     return inorder_data;

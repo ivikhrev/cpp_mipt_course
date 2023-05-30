@@ -36,22 +36,22 @@ TEST(AVLTree, InorderTraversal) {
     std::vector<int> v{2, 1, 3};
     std::vector<int> expected{1, 2, 3};
     auto t = AVLTree<int>(v);
-    ASSERT_EQ(expected, t.inorder_traversal());
+    ASSERT_EQ(expected, t.inorder_keys());
 }
 
 TEST(AVLTree, CanCopy) {
     auto t = AVLTree<int>({1, 2, 3, 4, 5});
     auto copy = t;
-    ASSERT_EQ(t.inorder_traversal(), copy.inorder_traversal());
+    ASSERT_EQ(t.inorder_keys(), copy.inorder_keys());
 }
 
 TEST(AVLTree, TrueDeepCopy) {
     auto t = AVLTree<int>({1, 2, 4, 5});
     auto copy = t;
-    ASSERT_EQ(t.inorder_traversal(), copy.inorder_traversal());
+    ASSERT_EQ(t.inorder_keys(), copy.inorder_keys());
     t.insert(3);
     copy.insert(3);
-    ASSERT_EQ(t.inorder_traversal(), copy.inorder_traversal());
+    ASSERT_EQ(t.inorder_keys(), copy.inorder_keys());
 }
 
 TEST(AVLTree, CopyCorrectKmin) {
@@ -78,63 +78,63 @@ TEST(AVLTree, LeftRotateRoot) {
     std::vector<int> v{1, 2, 3};
     std::vector<int> expected{1, 2, 3};
     auto t = AVLTree<int>(v);
-    ASSERT_EQ(expected, t.inorder_traversal());
+    ASSERT_EQ(expected, t.inorder_keys());
 }
 
 TEST(AVLTree, LeftRotate) {
     std::vector<int> v{2, 1, 3, 4, 5};
     std::vector<int> expected{1, 2, 3, 4, 5};
     auto t = AVLTree<int>(v);
-    ASSERT_EQ(expected, t.inorder_traversal());
+    ASSERT_EQ(expected, t.inorder_keys());
 }
 
 TEST(AVLTree, RightRotateRoot) {
     std::vector<int> v{3, 2, 1};
     std::vector<int> expected{1, 2, 3};
     auto t = AVLTree<int>(v);
-    ASSERT_EQ(expected, t.inorder_traversal());
+    ASSERT_EQ(expected, t.inorder_keys());
 }
 
 TEST(AVLTree, RightRotate) {
     std::vector<int> v{4, 5, 3, 2, 1};
     std::vector<int> expected{1, 2, 3, 4, 5};
     auto t = AVLTree<int>(v);
-    ASSERT_EQ(expected, t.inorder_traversal());
+    ASSERT_EQ(expected, t.inorder_keys());
 }
 
 TEST(AVLTree, LeftRightRotate) {
     std::vector<int> v{3, 1, 2};
     std::vector<int> expected{1, 2, 3};
     auto t = AVLTree<int>(v);
-    ASSERT_EQ(expected, t.inorder_traversal());
+    ASSERT_EQ(expected, t.inorder_keys());
 }
 
 TEST(AVLTree, ComplexLeftRightRotate) {
     std::vector<int> v{5, 1, 3, 2, 4, 0};
     std::vector<int> expected{0, 1, 2, 3, 4, 5};
     auto t = AVLTree<int>(v);
-    ASSERT_EQ(expected, t.inorder_traversal());
+    ASSERT_EQ(expected, t.inorder_keys());
 }
 
 TEST(AVLTree, RightLeftRotate) {
     std::vector<int> v{1, 3 , 2};
     std::vector<int> expected{1, 2, 3};
     auto t = AVLTree<int>(v);
-    ASSERT_EQ(expected, t.inorder_traversal());
+    ASSERT_EQ(expected, t.inorder_keys());
 }
 
 TEST(AVLTree, ComplexRightLeftRotate) {
     std::vector<int> v{0, 4, 5, 2, 1, 3};
     std::vector<int> expected{0, 1, 2, 3, 4, 5};
     auto t = AVLTree<int>(v);
-    ASSERT_EQ(expected, t.inorder_traversal());
+    ASSERT_EQ(expected, t.inorder_keys());
 }
 
 TEST(AVLTree, TreeConstruct) {
     std::vector<int> v{5, 1, 7, 6, 9, 3};
     std::vector<int> expected{1, 3, 5, 6, 7 , 9};
     auto t = AVLTree<int>(v);
-    ASSERT_EQ(expected, t.inorder_traversal());
+    ASSERT_EQ(expected, t.inorder_keys());
 }
 
 TEST(AVLTree, Insert) {
@@ -142,7 +142,7 @@ TEST(AVLTree, Insert) {
     std::vector<int> expected{1, 2, 3, 5, 6, 7 , 9};
     auto t = AVLTree<int>(v);
     t.insert(2);
-    ASSERT_EQ(expected, t.inorder_traversal());
+    ASSERT_EQ(expected, t.inorder_keys());
 }
 
 TEST(AVLTree, Find) {
@@ -177,7 +177,7 @@ TEST(AVLTree, KthMin) {
     std::vector<int> v{0, 1, 2, 3, 4, 5};
     std::vector<int> expected{0, 1, 2, 3, 4, 5};
     auto t = AVLTree<int>(v);
-    ASSERT_EQ(expected, t.inorder_traversal());
+    ASSERT_EQ(expected, t.inorder_keys());
     ASSERT_EQ(0, t.kmin(1));
     ASSERT_EQ(1, t.kmin(2));
     ASSERT_EQ(2, t.kmin(3));
@@ -190,7 +190,7 @@ TEST(AVLTree, LessCount) {
     std::vector<int> v{0, 1, 2, 3, 4, 5};
     std::vector<int> expected{0, 1, 2, 3, 4, 5};
     auto t = AVLTree<int>(v);
-    ASSERT_EQ(expected, t.inorder_traversal());
+    ASSERT_EQ(expected, t.inorder_keys());
     ASSERT_EQ(0, t.less_count(0));
     ASSERT_EQ(1, t.less_count(1));
     ASSERT_EQ(2, t.less_count(2));
