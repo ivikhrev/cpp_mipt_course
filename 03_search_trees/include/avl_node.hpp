@@ -3,10 +3,10 @@
 #include <iostream>
 
 template<class T>
-struct Node {
+struct AVLNode {
     const T key; // ?
 
-    Node(T key, Node* parent = nullptr, Node* left = nullptr, Node* right = nullptr, int height = 0,
+    AVLNode(T key, AVLNode* parent = nullptr, AVLNode* left = nullptr, AVLNode* right = nullptr, int height = 0,
         int subtree_nodes_count = 0) : key(key), parent(parent),
         left(left), right(right), height(height), subtree_nodes_count(subtree_nodes_count) {
         if (left != nullptr && right != nullptr) {
@@ -51,9 +51,9 @@ struct Node {
 
     int balance_factor() const;
 
-    Node* parent;
-    Node* left;
-    Node* right;
+    AVLNode* parent;
+    AVLNode* left;
+    AVLNode* right;
 
     const int NULL_NODE_HEIGHT = -1;
     int height;  // AVL invariant
@@ -61,7 +61,7 @@ struct Node {
 };
 
 template<class T>
-int Node<T>::balance_factor() const {
+int AVLNode<T>::balance_factor() const {
     if (left != nullptr && right != nullptr) {
         return left->height - right->height;
     } else if (left != nullptr) {

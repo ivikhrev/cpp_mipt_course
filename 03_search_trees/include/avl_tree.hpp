@@ -1,5 +1,5 @@
 #pragma once
-#include "node.hpp"
+#include "avl_node.hpp"
 #include "common.hpp"
 
 #include <cassert>
@@ -18,21 +18,21 @@ public:
 
     void insert(T key);
     void erase(T key);
-    Node<T>* find(T key) const;
+    AVLNode<T>* find(T key) const;
 
     int kmin(int k) const;
     int less_count(int k) const;
 
     std::vector<T> inorder_keys() const;
 private:
-    Node<T>* root = nullptr;
-    void rebalance(Node<T>* node);
-    void update_nodes_heights(Node<T>* node);
-    void update_nodes_subtree_count(Node<T>* node);
-    void left_rotate(Node<T>* node);
-    void right_rotate(Node<T>* node);
-    void left_right_rotate(Node<T>* node);
-    void right_left_rotate(Node<T>* node);
+    AVLNode<T>* root = nullptr;
+    void rebalance(AVLNode<T>* node);
+    void update_nodes_heights(AVLNode<T>* node);
+    void update_nodes_subtree_count(AVLNode<T>* node);
+    void left_rotate(AVLNode<T>* node);
+    void right_rotate(AVLNode<T>* node);
+    void left_right_rotate(AVLNode<T>* node);
+    void right_left_rotate(AVLNode<T>* node);
     void delete_nodes();
 };
 
@@ -47,8 +47,8 @@ template<class T>
 AVLTree<T>::AVLTree(const AVLTree<T>& other) {
     // preorder traversal (root, left, right)
     if (other.root != nullptr) {
-        std::stack<Node<T>*> s_orig, s_copy;
-        root = new Node<T>(other.root->key, nullptr, nullptr, nullptr, other.root->height, other.root->subtree_nodes_count);
+        std::stack<AVLNode<T>*> s_orig, s_copy;
+        root = new AVLNode<T>(other.root->key, nullptr, nullptr, nullptr, other.root->height, other.root->subtree_nodes_count);
         s_copy.push(root);
         s_orig.push(other.root);
         while (!s_orig.empty()) {
@@ -58,13 +58,13 @@ AVLTree<T>::AVLTree(const AVLTree<T>& other) {
             s_copy.pop();
             if (ocurr->right != nullptr) {
                 s_orig.push(ocurr->right);
-                ccurr->right = new Node<T>(ocurr->right->key, ccurr, nullptr, nullptr,
+                ccurr->right = new AVLNode<T>(ocurr->right->key, ccurr, nullptr, nullptr,
                     ocurr->right->height, ocurr->right->subtree_nodes_count);
                 s_copy.push(ccurr->right);
             }
             if (ocurr->left != nullptr) {
                 s_orig.push(ocurr->left);
-                ccurr->left = new Node<T>(ocurr->left->key, ccurr, nullptr, nullptr,
+                ccurr->left = new AVLNode<T>(ocurr->left->key, ccurr, nullptr, nullptr,
                     ocurr->left->height, ocurr->left->subtree_nodes_count);
                 s_copy.push(ccurr->left);
             }
@@ -86,7 +86,7 @@ AVLTree<T>::~AVLTree() {
 }
 
 template<class T>
-void AVLTree<T>::update_nodes_heights(Node<T>* node) {
+void AVLTree<T>::update_nodes_heights(AVLNode<T>* node) {
     auto* parent = node;
     while (parent != nullptr) {
         parent->update_height();
@@ -95,7 +95,7 @@ void AVLTree<T>::update_nodes_heights(Node<T>* node) {
 }
 
 template<class T>
-void AVLTree<T>::update_nodes_subtree_count(Node<T>* node) {
+void AVLTree<T>::update_nodes_subtree_count(AVLNode<T>* node) {
     auto* parent = node;
     while (parent != nullptr) {
         parent->update_subtree_count();
@@ -104,8 +104,8 @@ void AVLTree<T>::update_nodes_subtree_count(Node<T>* node) {
 }
 
 template<class T>
-Node<T>* AVLTree<T>::find(T key) const {
-    Node<T>* curr_node = root;
+AVLNode<T>* AVLTree<T>::find(T key) const {
+    AVLNode<T>* curr_node = root;
     while(curr_node != nullptr) {
         if (curr_node->key == key) {
             return curr_node;
@@ -123,11 +123,11 @@ Node<T>* AVLTree<T>::find(T key) const {
 template<class T>
 void AVLTree<T>::insert(T key) {
     if (root == nullptr) {
-        root = new Node<T>(key);
+        root = new AVLNode<T>(key);
         return;
     }
 
-    Node<T>* curr_node = root;
+    AVLNode<T>* curr_node = root;
     while(curr_node->left != nullptr || curr_node->right != nullptr) {
         if (key >= curr_node->key) {
             if (curr_node->right == nullptr) break;
@@ -139,13 +139,13 @@ void AVLTree<T>::insert(T key) {
     }
 
     if (key >= curr_node->key) {
-        //auto new_node = new Node<T>(key, curr_node, nullptr, nullptr);
-        curr_node->right = new Node<T>(key, curr_node, nullptr, nullptr);
+        //auto new_node = new AVLNode<T>(key, curr_node, nullptr, nullptr);
+        curr_node->right = new AVLNode<T>(key, curr_node, nullptr, nullptr);
         update_nodes_heights(curr_node);
         update_nodes_subtree_count(curr_node);
         curr_node = curr_node->right;
     } else {
-        curr_node->left = new Node<T>(key, curr_node, nullptr, nullptr);
+        curr_node->left = new AVLNode<T>(key, curr_node, nullptr, nullptr);
         update_nodes_heights(curr_node);
         update_nodes_subtree_count(curr_node);
         curr_node = curr_node->left;
@@ -154,8 +154,18 @@ void AVLTree<T>::insert(T key) {
 }
 
 template<class T>
-void AVLTree<T>::rebalance(Node<T>* node) {
-    Node<T>* curr_node = node;
+void AVLTree<T>::erase(T key) {
+    AVLNode<T>* to_delete = find(key);
+    if (to_delete == nullptr) {
+        return;
+    }
+
+    rebalance(to_delete);
+}
+
+template<class T>
+void AVLTree<T>::rebalance(AVLNode<T>* node) {
+    AVLNode<T>* curr_node = node;
     while (curr_node != nullptr) {
         if (curr_node->balance_factor() < -1) {  // right heavy
             if (curr_node->right->balance_factor() == 1) { // left heavy
@@ -178,7 +188,7 @@ void AVLTree<T>::rebalance(Node<T>* node) {
 }
 
 template<class T>
-void AVLTree<T>::right_rotate(Node<T>* node) {
+void AVLTree<T>::right_rotate(AVLNode<T>* node) {
     auto* parent = node->parent;
     if (parent != nullptr) {
         // make old left new paret
@@ -239,7 +249,7 @@ void AVLTree<T>::right_rotate(Node<T>* node) {
 }
 
 template<class T>
-void AVLTree<T>::left_rotate(Node<T>* node) {
+void AVLTree<T>::left_rotate(AVLNode<T>* node) {
     auto* parent = node->parent;
     if (parent != nullptr) {
         // make old right new paret
@@ -305,7 +315,7 @@ std::vector<T> AVLTree<T>::inorder_keys() const {
     std::vector<T> inorder_data;
     auto inorder_nodes = inorder_traversal(root);
     std::transform(inorder_nodes.cbegin(), inorder_nodes.cend(),
-        std::back_inserter(inorder_data), [](const Node<T>* n) {return n->key;});
+        std::back_inserter(inorder_data), [](const AVLNode<T>* n) {return n->key;});
     return inorder_data;
 }
 

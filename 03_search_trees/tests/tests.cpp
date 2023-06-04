@@ -1,10 +1,12 @@
 // #include "node.hpp"
 #include "avl_tree.hpp"
+#include "avl_node.hpp"
 #include "common.hpp"
 
 #include <utils/test_utils.hpp>
 
 #include <gtest/gtest.h>
+
 #include <cmath>
 #include <filesystem>
 #include <fstream>
@@ -12,15 +14,15 @@
 
 namespace fs = std::filesystem;
 
-TEST(Node, CanConstructWithParameters) {
-    ASSERT_NO_THROW((Node<int>{0, 0, 0}));
+TEST(AVLNode, CanConstructWithParameters) {
+    ASSERT_NO_THROW((AVLNode<int>{0, 0, 0}));
 }
 
-TEST(Node, CanConstructWithAllParameters) {
-    Node<int> parent{0};
-    Node<int> left{1};
-    Node<int> right{2};
-    ASSERT_NO_THROW((Node<int>{0, &parent, &left, &right}));
+TEST(AVLNode, CanConstructWithAllParameters) {
+    AVLNode<int> parent{0};
+    AVLNode<int> left{1};
+    AVLNode<int> right{2};
+    ASSERT_NO_THROW((AVLNode<int>{0, &parent, &left, &right}));
 }
 
 TEST(AVLTree, CanDefaultConstruct) {

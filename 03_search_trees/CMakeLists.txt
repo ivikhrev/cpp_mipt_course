@@ -1,5 +1,4 @@
 file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp)
-file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 
 add_target(NAME search_trees
            MAIN "${CMAKE_CURRENT_SOURCE_DIR}/main.cpp"
