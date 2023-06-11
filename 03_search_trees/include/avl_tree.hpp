@@ -160,7 +160,104 @@ void AVLTree<T>::erase(T key) {
         return;
     }
 
-    rebalance(to_delete);
+    AVLNode<T>* curr = to_delete;
+    if (to_delete->right != nullptr) {
+        curr = to_delete->right;
+        while (curr->left != nullptr) {
+            curr = curr->left;
+        }
+        if (curr == to_delete->right) {
+            curr->parent->right = nullptr;
+        } else {
+            curr->parent->left = nullptr;
+        }
+    }
+
+    AVLNode<T>* parent = to_delete->parent;
+    //delete root
+    if (parent == nullptr) {
+        if (curr != nullptr && curr != to_delete) {
+            // curr->parent->left = curr->right;
+            curr->parent = nullptr;
+            curr->left = to_delete->left;
+            if (to_delete->left != nullptr) {
+                to_delete->left->parent = curr;
+            }
+
+            if (curr != to_delete->right) {
+                auto* old_right = curr->right;
+                curr->right = to_delete->right;
+                if (to_delete->right != nullptr) {
+                    to_delete->right->left = old_right;
+                    to_delete->right->parent = curr;
+                }
+            } else {
+                curr->right = nullptr;
+            }
+            root = curr;
+        } else {
+            curr = root = to_delete->left;
+            if (to_delete->left != nullptr) {
+                to_delete->left ->parent = nullptr;
+            }
+        }
+    }
+    else if (to_delete == parent->right && curr == to_delete) {
+        parent->right = curr->left;
+        if (curr->left != nullptr) {
+            curr->left->parent = parent;
+            curr = curr->left;
+        } else {
+            curr = parent;
+        }
+    }
+    else if (to_delete == parent->right) {
+        parent->right = curr;
+        curr->parent = parent;
+
+        curr->left = to_delete->left;
+        if (curr->left != nullptr) {
+            curr->left->parent = curr;
+        }
+
+        curr->right = to_delete->right;
+        if (curr->right != nullptr && curr != curr->right) {
+            curr->right->parent = curr;
+        } else {
+            curr->right = nullptr;
+        }
+    }
+    else if (to_delete == parent->left && curr == to_delete) {
+        parent->left = curr->left;
+        if (curr->left != nullptr) {
+            curr->left->parent = parent;
+            curr = curr->left;
+        } else {
+            curr = parent;
+        }
+
+    }
+    else if (to_delete == parent->left) {
+        parent->left = curr;
+        curr->parent = parent;
+
+        curr->left = to_delete->left;
+        if (curr->left != nullptr) {
+            curr->left->parent = curr;
+        }
+
+        curr->right = to_delete->right;
+        if (curr->right != nullptr && curr != curr->right) {
+            curr->right->parent = curr;
+        } else {
+            curr->right = nullptr;
+        }
+    }
+
+    update_nodes_heights(curr);
+    update_nodes_subtree_count(curr);
+    delete to_delete;
+    rebalance(curr);
 }
 
 template<class T>
@@ -171,11 +268,11 @@ void AVLTree<T>::rebalance(AVLNode<T>* node) {
             if (curr_node->right->balance_factor() == 1) { // left heavy
                 right_rotate(curr_node->right);
                 left_rotate(curr_node);
-            } else if (curr_node->right->balance_factor() == -1) { // right heavy
+            } else if (curr_node->right->balance_factor() == -1 || curr_node->right->balance_factor() == 0) { // right heavy
                 left_rotate(curr_node);
             }
         } else if (curr_node->balance_factor() > 1) {  // left heavy
-            if (curr_node->left->balance_factor() == 1) { // left heavy
+            if (curr_node->left->balance_factor() == 1 || curr_node->left->balance_factor() == 0) { // left heavy
                 right_rotate(curr_node);
             } else if (curr_node->left->balance_factor() == -1) { // right heavy
                 left_rotate(curr_node->left);

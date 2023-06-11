@@ -10,6 +10,7 @@
 #include <cmath>
 #include <filesystem>
 #include <fstream>
+#include <numeric>
 #include <vector>
 
 namespace fs = std::filesystem;
@@ -160,7 +161,7 @@ TEST(AVLTree, Find) {
     ASSERT_EQ(9, t.find(9)->key);
 }
 
-TEST(AVLTree, FindAfterFind) {
+TEST(AVLTree, FindAfterInsert) {
     std::vector<int> v{5, 1, 7, 6, 9, 3};
     auto t = AVLTree<int>(v);
     ASSERT_EQ(1, t.find(1)->key);
@@ -173,6 +174,117 @@ TEST(AVLTree, FindAfterFind) {
     ASSERT_EQ(9, t.find(9)->key);
     t.insert(2);
     ASSERT_EQ(2, t.find(2)->key);
+}
+
+TEST(AVLTree, EraseLeaf) {
+    std::vector<int> v{5, 1, 7, 6, 9, 3};
+    std::vector<int> expected{1, 5, 6, 7 , 9};
+    auto t = AVLTree<int>(v);
+    t.erase(3);
+    ASSERT_EQ(expected, t.inorder_keys());
+}
+
+TEST(AVLTree, EraseRoot0) {
+    std::vector<int> v{2, 3};
+    std::vector<int> expected{3};
+    auto t = AVLTree<int>(v);
+    t.erase(2);
+    ASSERT_EQ(expected, t.inorder_keys());
+}
+
+TEST(AVLTree, EraseRoot1) {
+    std::vector<int> v{3, 2};
+    std::vector<int> expected{2};
+    auto t = AVLTree<int>(v);
+    t.erase(3);
+    ASSERT_EQ(expected, t.inorder_keys());
+}
+
+TEST(AVLTree, EraseRoot2) {
+    std::vector<int> v{3, 2, 1};
+    std::vector<int> expected{2, 3};
+    auto t = AVLTree<int>(v);
+    t.erase(1);
+    ASSERT_EQ(expected, t.inorder_keys());
+}
+
+TEST(AVLTree, EraseRoot3) {
+    std::vector<int> v{5, 1, 7, 6, 9, 3};
+    std::vector<int> expected{1, 3, 6, 7 , 9};
+    auto t = AVLTree<int>(v);
+    t.erase(5);
+    ASSERT_EQ(expected, t.inorder_keys());
+}
+
+TEST(AVLTree, EraseMiddle1) {
+    std::vector<int> v{5, 1, 7, 6, 9, 3};
+    std::vector<int> expected{3, 5, 6, 7 , 9};
+    auto t = AVLTree<int>(v);
+    t.erase(1);
+    ASSERT_EQ(expected, t.inorder_keys());
+}
+
+TEST(AVLTree, EraseMiddle2) {
+    std::vector<int> v{5, 1, 7, 6, 9, 3};
+    std::vector<int> expected{1, 3, 5, 6, 9};
+    auto t = AVLTree<int>(v);
+    t.erase(7);
+    ASSERT_EQ(expected, t.inorder_keys());
+}
+
+TEST(AVLTree, EraseMiddle3) {
+    std::vector<int> v{5, 1, 7, 6, 3};
+    std::vector<int> expected{1, 3, 5, 6};
+    auto t = AVLTree<int>(v);
+    t.erase(7);
+    ASSERT_EQ(expected, t.inorder_keys());
+}
+
+TEST(AVLTree, EraseMiddle4) {
+    std::vector<int> v{5, 1, 7, 6, 9, 0};
+    std::vector<int> expected{0, 5, 6, 7, 9};
+    auto t = AVLTree<int>(v);
+    t.erase(1);
+    ASSERT_EQ(expected, t.inorder_keys());
+}
+
+TEST(AVLTree, EraseMiddle5) {
+    std::vector<int> v{5, 1, 3, 2, 7, 6, 0, -1, 4, 8, 9, 10, 11, 12};
+    std::vector<int> expected{-1, 0, 2, 3, 4, 5, 6, 7 ,8, 9, 10, 11, 12};
+    auto t = AVLTree<int>(v);
+    t.erase(1);
+    ASSERT_EQ(expected, t.inorder_keys());
+}
+
+TEST(AVLTree, EraseMiddle6) {
+    std::vector<int> v{5, 1, 3, 2, 7, 6, 0, -1, 4, 8, 9, 10, 11, 12};
+    std::vector<int> expected{-1, 0, 1, 2, 3, 4, 5, 7 ,8, 9, 10, 11, 12};
+    auto t = AVLTree<int>(v);
+    t.erase(6);
+    ASSERT_EQ(expected, t.inorder_keys());
+}
+
+TEST(AVLTree, EraseStressTest1) {
+    std::vector<int> v{5, 1, 3, 2, 7, 6, 0, -1, 4, 8, 9, 10, 11, 12};
+    std::vector<int> expected{-1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
+    auto t = AVLTree<int>(v);
+    for (size_t i = 0; i < v.size(); ++i) {
+        t.erase(v[i]);
+        expected.erase(std::find(expected.begin(), expected.end(), v[i]));
+        ASSERT_EQ(expected, t.inorder_keys());
+    }
+}
+
+TEST(AVLTree, EraseStressTest2) {
+    std::vector<int> expected(100);
+    std::iota(expected.begin(), expected.end(), 0);
+    std::vector<int> copy = expected;
+    auto t = AVLTree<int>(expected);
+    for (size_t i = 0; i < 100; ++i) {
+        t.erase(copy[i]);
+        expected.erase(std::find(expected.begin(), expected.end(), copy[i]));
+        ASSERT_EQ(expected, t.inorder_keys());
+    }
 }
 
 TEST(AVLTree, KthMin) {
