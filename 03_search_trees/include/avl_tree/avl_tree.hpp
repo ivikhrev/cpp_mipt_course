@@ -1,5 +1,5 @@
 #pragma once
-#include "avl_node.hpp"
+#include "avl_tree/avl_node.hpp"
 #include "common.hpp"
 
 #include <cassert>
@@ -31,8 +31,6 @@ private:
     void update_nodes_subtree_count(AVLNode<T>* node);
     void left_rotate(AVLNode<T>* node);
     void right_rotate(AVLNode<T>* node);
-    void left_right_rotate(AVLNode<T>* node);
-    void right_left_rotate(AVLNode<T>* node);
     void delete_nodes();
 };
 
@@ -177,7 +175,6 @@ void AVLTree<T>::erase(T key) {
     //delete root
     if (parent == nullptr) {
         if (curr != nullptr && curr != to_delete) {
-            // curr->parent->left = curr->right;
             curr->parent = nullptr;
             curr->left = to_delete->left;
             if (to_delete->left != nullptr) {
@@ -288,7 +285,7 @@ template<class T>
 void AVLTree<T>::right_rotate(AVLNode<T>* node) {
     auto* parent = node->parent;
     if (parent != nullptr) {
-        // make old left new paret
+        // make old left new parent
         if (node == parent->left) {
             parent->left = node->left;
             node->left->parent = parent;
