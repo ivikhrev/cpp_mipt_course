@@ -6,7 +6,7 @@ template<class T>
 struct AVLNode {
     const T key; // ?
 
-    AVLNode(T key, AVLNode* parent = nullptr, AVLNode* left = nullptr, AVLNode* right = nullptr, int height = 0,
+    AVLNode(T key = 0, AVLNode* parent = nullptr, AVLNode* left = nullptr, AVLNode* right = nullptr, int height = 0,
         int subtree_nodes_count = 0) : key(key), parent(parent),
         left(left), right(right), height(height), subtree_nodes_count(subtree_nodes_count) {
         if (left != nullptr && right != nullptr) {

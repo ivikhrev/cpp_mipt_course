@@ -14,7 +14,7 @@
 namespace fs = std::filesystem;
 
 template<class Cache>
-class CacheFixtureTests : public testing::TestWithParam<std::string> {
+class CacheFixtureTests : public testing::Test {
 public:
     static const std::string& data_directory() {
         // Establish the directory name only once for the application.

@@ -12,7 +12,8 @@ struct RBNode {
 
     T key; // ?
 
-    RBNode(T key, RBNode* parent = nullptr, RBNode* left = nullptr, RBNode* right = nullptr, Colour colour = Colour::RED,
+
+    RBNode(T key = 0, RBNode* parent = nullptr, RBNode* left = nullptr, RBNode* right = nullptr, Colour colour = Colour::RED,
         int subtree_nodes_count = 0) : key(key), parent(parent),
         left(left), right(right), colour(colour), subtree_nodes_count(subtree_nodes_count) {
         if (left != nullptr && right != nullptr) {
