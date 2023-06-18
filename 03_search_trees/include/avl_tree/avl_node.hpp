@@ -4,7 +4,7 @@
 
 template<class T>
 struct AVLNode {
-    const T key; // ?
+    T key;
 
     AVLNode(T key = 0, AVLNode* parent = nullptr, AVLNode* left = nullptr, AVLNode* right = nullptr, int height = 0,
         int subtree_nodes_count = 0) : key(key), parent(parent),

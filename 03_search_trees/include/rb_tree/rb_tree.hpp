@@ -27,9 +27,8 @@ public:
 
 private:
     RBNode<T>* root = nullptr;
-    void rebalance(RBNode<T>* node);
+    void fix_double_red(RBNode<T>* node);
     void fix_double_black(RBNode<T>* node);
-    void recolour_nodes(RBNode<T>* node);
     void update_nodes_subtree_count(RBNode<T>* node);
     void left_rotate(RBNode<T>* node);
     void right_rotate(RBNode<T>* node);
@@ -83,14 +82,6 @@ void RBTree<T>::delete_nodes() {
 template<class T>
 RBTree<T>::~RBTree() {
     delete_nodes();
-}
-
-template<class T>
-void RBTree<T>::recolour_nodes(RBNode<T>* node) {
-    auto* parent = node;
-    // while (parent->parent != nullptr) {
-    //     if
-    // }
 }
 
 template<class T>
@@ -149,7 +140,7 @@ void RBTree<T>::insert(T key) {
         update_nodes_subtree_count(curr_node);
         curr_node = curr_node->left;
     }
-    rebalance(curr_node);
+    fix_double_red(curr_node);
 }
 
 template<class T>
@@ -172,14 +163,9 @@ void RBTree<T>::erase(T key) {
 
     if (curr->is_black() && (curr->left != nullptr && curr->left->is_red())) {
             curr->left->colour = Colour::BLACK;
-    // }
-    //  else if (curr->is_black() && !curr->is_root() && curr->parent->is_red() && curr->sibling() == nullptr) {
-    //     curr->parent->colour = Colour::BLACK;
     } else if (curr->is_black() && (curr->left == nullptr || curr->left->is_black())) {
         fix_double_black(curr);
     }
-    // else if (curr->is_red() && (curr->left == nullptr || curr->left->is_black())) {
-            // do nothing, just deleted red leaf
 
 
     RBNode<T>* parent = curr->parent;
@@ -199,9 +185,6 @@ void RBTree<T>::erase(T key) {
         }
     }
 
-    // fix_double_black(curr);
-
-    // // update_nodes_heights(curr);
     update_nodes_subtree_count(parent);
     delete curr;
 }
@@ -256,18 +239,13 @@ void RBTree<T>::fix_double_black(RBNode<T>* curr) {
 }
 
 template<class T>
-void RBTree<T>::rebalance(RBNode<T>* node) {
+void RBTree<T>::fix_double_red(RBNode<T>* node) {
     RBNode<T>* curr_node = node;
     while (curr_node != nullptr  && curr_node->parent != nullptr && curr_node->parent->parent != nullptr) {
         if (curr_node->colour == Colour::RED && curr_node->parent->colour == Colour::RED) {
             auto* parent = curr_node->parent;
             auto* grandfather = curr_node->parent->parent;
-            RBNode<T>* uncle;
-            if (grandfather->left == parent) {
-                uncle = grandfather->right;
-            } else {
-                uncle = grandfather->left;
-            }
+            auto* uncle = curr_node->uncle();
             if (uncle != nullptr && uncle->colour == Colour::RED) {
                 uncle->recolour();
                 parent->recolour();
@@ -277,22 +255,20 @@ void RBTree<T>::rebalance(RBNode<T>* node) {
             } else {
                 auto* parent = curr_node->parent;
                 auto* grandfather = curr_node->parent->parent;
-                RBNode<T>* uncle;
-                if (grandfather->left == parent && parent->left == curr_node) {
-                    // uncle = grandfather->right;
-                    right_rotate(grandfather);
+                if (parent->is_left() && curr_node->is_left()) {
                     std::swap(grandfather->colour, parent->colour);
-                } else if (grandfather->left == parent && parent->right == curr_node) {
+                    right_rotate(grandfather);
+                } else if (parent->is_left() && curr_node->is_right()) {
+                    std::swap(grandfather->colour, curr_node->colour);
                     left_rotate(parent);
                     right_rotate(grandfather);
-                    std::swap(grandfather->colour, curr_node->colour);
-                } else if (grandfather->right == parent && parent->right == curr_node) {
-                    left_rotate(grandfather);
+                } else if (parent->is_right() && curr_node->is_right()) {
                     std::swap(grandfather->colour, parent->colour);
-                } else if (grandfather->right == parent && parent->left == curr_node) {
+                    left_rotate(grandfather);
+                } else if (parent->is_right() && curr_node->is_left()) {
+                    std::swap(grandfather->colour, curr_node->colour);
                     right_rotate(parent);
                     left_rotate(grandfather);
-                    std::swap(grandfather->colour, curr_node->colour);
                 }
             }
         }
@@ -331,7 +307,6 @@ void RBTree<T>::right_rotate(RBNode<T>* node) {
             parent->right->right = node;
             node->parent = parent->right;
         }
-        // update_nodes_heights(node);
         update_nodes_subtree_count(node);
     } else {
         // make old left new root
@@ -352,11 +327,9 @@ void RBTree<T>::right_rotate(RBNode<T>* node) {
             old_left_right->parent = old_parent;
         }
 
-        // update_nodes_heights(old_parent);
         update_nodes_subtree_count(old_parent);
 
         root = new_parent;
-        // update_nodes_heights(root);
         update_nodes_subtree_count(root);
     }
 }
@@ -393,12 +366,10 @@ void RBTree<T>::left_rotate(RBNode<T>* node) {
             parent->left->left = node;
             node->parent = parent->left;
         }
-        // update_nodes_heights(node);
         update_nodes_subtree_count(node);
     } else {
         // make old right new root
         auto* old_parent = node;
-        // auto* old_parent_left = node->left;
         old_parent->right->parent = nullptr;
 
         auto* new_parent = old_parent->right;
@@ -414,11 +385,9 @@ void RBTree<T>::left_rotate(RBNode<T>* node) {
             old_right_left->parent = old_parent;
         }
 
-        // update_nodes_heights(old_parent);
         update_nodes_subtree_count(old_parent);
 
         root = new_parent;
-        // update_nodes_heights(root);
         update_nodes_subtree_count(root);
     }
 }

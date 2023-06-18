@@ -9,9 +9,7 @@ enum class Colour {
 
 template<class T>
 struct RBNode {
-
-    T key; // ?
-
+    T key;
 
     RBNode(T key = 0, RBNode* parent = nullptr, RBNode* left = nullptr, RBNode* right = nullptr, Colour colour = Colour::RED,
         int subtree_nodes_count = 0) : key(key), parent(parent),
