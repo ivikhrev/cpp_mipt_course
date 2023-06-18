@@ -10,7 +10,7 @@ enum class Colour {
 template<class T>
 struct RBNode {
 
-    const T key; // ?
+    T key; // ?
 
     RBNode(T key, RBNode* parent = nullptr, RBNode* left = nullptr, RBNode* right = nullptr, Colour colour = Colour::RED,
         int subtree_nodes_count = 0) : key(key), parent(parent),
@@ -23,8 +23,28 @@ struct RBNode {
         } else if (right != nullptr){
             right->parent = this;
         }
-        // update_height();
+
         update_subtree_count();
+    }
+
+    bool is_left() const {
+        return parent != nullptr ? this == parent->left : false;
+    }
+
+    bool is_right() const {
+        return parent != nullptr ? this == parent->right : false;
+    }
+
+    bool is_root() const {
+        return parent == nullptr;
+    }
+
+    bool is_red() const {
+        return colour == Colour::RED;
+    }
+
+    bool is_black() const {
+        return colour == Colour::BLACK;
     }
 
     int nodes_count() const {
@@ -38,6 +58,31 @@ struct RBNode {
         else if (colour == Colour::RED) {
             colour = Colour::BLACK;
         }
+    }
+
+    RBNode* uncle() const {
+        if (parent == nullptr || parent->parent == nullptr) {
+            return nullptr;
+        }
+        if (parent->is_left()) {
+            return parent->parent->right;
+        }
+        return parent->parent->left;
+    }
+
+    RBNode* sibling() const {
+        if (parent == nullptr) {
+            return nullptr;
+        }
+        if (is_left()) {
+            return parent->right;
+        }
+        return parent->left;
+    }
+
+    bool has_red_child() const {
+        return (left != nullptr && left->is_red()) ||
+            (right != nullptr && right->is_red());
     }
 
     void update_subtree_count() {
@@ -62,16 +107,3 @@ struct RBNode {
     Colour colour;
     int subtree_nodes_count;  // Efficient k-th minimum search
 };
-
-// template<class T>
-// int RBNode<T>::balance_factor() const {
-//     if (left != nullptr && right != nullptr) {
-//         return left->height - right->height;
-//     } else if (left != nullptr) {
-//         return left->height - NULL_NODE_HEIGHT;
-//     } else if (right != nullptr){
-//         return NULL_NODE_HEIGHT - right->height;
-//     } else {
-//         return height;
-//     }
-// }

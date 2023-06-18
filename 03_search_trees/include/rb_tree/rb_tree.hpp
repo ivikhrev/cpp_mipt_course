@@ -28,6 +28,7 @@ public:
 private:
     RBNode<T>* root = nullptr;
     void rebalance(RBNode<T>* node);
+    void fix_double_black(RBNode<T>* node);
     void recolour_nodes(RBNode<T>* node);
     void update_nodes_subtree_count(RBNode<T>* node);
     void left_rotate(RBNode<T>* node);
@@ -158,103 +159,100 @@ void RBTree<T>::erase(T key) {
         return;
     }
 
+    // find successor - leaf node in leftmost node in the right subtree
     RBNode<T>* curr = to_delete;
     if (to_delete->right != nullptr) {
         curr = to_delete->right;
         while (curr->left != nullptr) {
             curr = curr->left;
         }
-        if (curr == to_delete->right) {
-            curr->parent->right = nullptr;
-        } else {
-            curr->parent->left = nullptr;
-        }
     }
 
-    RBNode<T>* parent = to_delete->parent;
-    //delete root
-    if (parent == nullptr) {
-        if (curr != nullptr && curr != to_delete) {
-            curr->parent = nullptr;
-            curr->left = to_delete->left;
-            if (to_delete->left != nullptr) {
-                to_delete->left->parent = curr;
-            }
+    std::swap(to_delete->key, curr->key);
 
-            if (curr != to_delete->right) {
-                auto* old_right = curr->right;
-                curr->right = to_delete->right;
-                if (to_delete->right != nullptr) {
-                    to_delete->right->left = old_right;
-                    to_delete->right->parent = curr;
-                }
-            } else {
-                curr->right = nullptr;
-            }
-            root = curr;
-        } else {
-            curr = root = to_delete->left;
-            if (to_delete->left != nullptr) {
-                to_delete->left ->parent = nullptr;
-            }
-        }
+    if (curr->is_black() && (curr->left != nullptr && curr->left->is_red())) {
+            curr->left->colour = Colour::BLACK;
+    // }
+    //  else if (curr->is_black() && !curr->is_root() && curr->parent->is_red() && curr->sibling() == nullptr) {
+    //     curr->parent->colour = Colour::BLACK;
+    } else if (curr->is_black() && (curr->left == nullptr || curr->left->is_black())) {
+        fix_double_black(curr);
     }
-    else if (to_delete == parent->right && curr == to_delete) {
+    // else if (curr->is_red() && (curr->left == nullptr || curr->left->is_black())) {
+            // do nothing, just deleted red leaf
+
+
+    RBNode<T>* parent = curr->parent;
+    if (curr->is_root()) {
+        root = curr->left;
+    }
+    else if (curr->is_right()) {
         parent->right = curr->left;
         if (curr->left != nullptr) {
             curr->left->parent = parent;
-            curr = curr->left;
-        } else {
-            curr = parent;
         }
     }
-    else if (to_delete == parent->right) {
-        parent->right = curr;
-        curr->parent = parent;
-
-        curr->left = to_delete->left;
-        if (curr->left != nullptr) {
-            curr->left->parent = curr;
-        }
-
-        curr->right = to_delete->right;
-        if (curr->right != nullptr && curr != curr->right) {
-            curr->right->parent = curr;
-        } else {
-            curr->right = nullptr;
-        }
-    }
-    else if (to_delete == parent->left && curr == to_delete) {
+    else if (curr->is_left()) {
         parent->left = curr->left;
         if (curr->left != nullptr) {
             curr->left->parent = parent;
-            curr = curr->left;
-        } else {
-            curr = parent;
-        }
-
-    }
-    else if (to_delete == parent->left) {
-        parent->left = curr;
-        curr->parent = parent;
-
-        curr->left = to_delete->left;
-        if (curr->left != nullptr) {
-            curr->left->parent = curr;
-        }
-
-        curr->right = to_delete->right;
-        if (curr->right != nullptr && curr != curr->right) {
-            curr->right->parent = curr;
-        } else {
-            curr->right = nullptr;
         }
     }
 
-    // update_nodes_heights(curr);
-    update_nodes_subtree_count(curr);
-    delete to_delete;
-    rebalance(curr);
+    // fix_double_black(curr);
+
+    // // update_nodes_heights(curr);
+    update_nodes_subtree_count(parent);
+    delete curr;
+}
+
+template<class T>
+void RBTree<T>::fix_double_black(RBNode<T>* curr) {
+        if (curr == nullptr) {
+            return;
+        }
+
+        RBNode<T>* parent = curr->parent;
+        auto* sibling = curr->sibling();
+        if (sibling == nullptr) {
+            fix_double_black(parent);
+        }
+        else if (sibling->is_black() && sibling->has_red_child()) {
+            if (sibling->is_left()) {
+                if (sibling->left !=nullptr && sibling->left->is_red()) {
+                    sibling->left->colour = Colour::BLACK;
+                    right_rotate(sibling->parent);
+                } else {
+                    sibling->right->colour = Colour::BLACK;
+                    left_rotate(sibling);
+                    right_rotate(sibling->parent);
+                }
+            } else {
+                if (sibling->right !=nullptr && sibling->right->is_red()) {
+                    sibling->right->colour = Colour::BLACK;
+                    left_rotate(sibling->parent);
+                } else {
+                    sibling->left->colour = Colour::BLACK;
+                    right_rotate(sibling);
+                    left_rotate(sibling->parent);
+                }
+            }
+        } else if (sibling->is_black()) {
+            sibling->colour = Colour::RED;
+            if (parent->is_red()) {
+                parent->colour = Colour::BLACK;
+            } else {
+                fix_double_black(parent);
+            }
+        } else if (sibling->is_red()) {
+            std::swap(parent->colour, sibling->colour);
+            if (sibling->is_left()) {
+                right_rotate(parent);
+            } else {
+                left_rotate(parent);
+            }
+            fix_double_black(curr);
+        }
 }
 
 template<class T>

@@ -169,28 +169,25 @@ void AVLTree<T>::erase(T key) {
         } else {
             curr->parent->left = nullptr;
         }
+        curr->parent = nullptr;
     }
 
     AVLNode<T>* parent = to_delete->parent;
     //delete root
     if (parent == nullptr) {
         if (curr != nullptr && curr != to_delete) {
-            curr->parent = nullptr;
             curr->left = to_delete->left;
             if (to_delete->left != nullptr) {
                 to_delete->left->parent = curr;
             }
 
-            if (curr != to_delete->right) {
-                auto* old_right = curr->right;
-                curr->right = to_delete->right;
-                if (to_delete->right != nullptr) {
-                    to_delete->right->left = old_right;
-                    to_delete->right->parent = curr;
-                }
-            } else {
-                curr->right = nullptr;
+            auto* old_right = curr->right;
+            curr->right = to_delete->right;
+            if (to_delete->right != nullptr) {
+                to_delete->right->left = old_right;
+                to_delete->right->parent = curr;
             }
+
             root = curr;
         } else {
             curr = root = to_delete->left;

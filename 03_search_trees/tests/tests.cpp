@@ -671,6 +671,121 @@ INSTANTIATE_TEST_SUITE_P(RBTree,
                          ::testing::ValuesIn(get_files_in_dir(RBTreeFixtureTests::data_directory()))
 );
 
+
+TEST(RBTree, EraseLeaf) {
+    std::vector<int> v{5, 1, 7, 6, 9, 3};
+    std::vector<int> expected{1, 5, 6, 7 , 9};
+    auto t = RBTree<int>(v);
+    t.erase(3);
+    ASSERT_EQ(expected, t.inorder_keys());
+}
+
+TEST(RBTree, EraseRoot0) {
+    std::vector<int> v{2, 3};
+    std::vector<int> expected{3};
+    auto t = RBTree<int>(v);
+    t.erase(2);
+    ASSERT_EQ(expected, t.inorder_keys());
+}
+
+TEST(RBTree, EraseRoot1) {
+    std::vector<int> v{3, 2};
+    std::vector<int> expected{2};
+    auto t = RBTree<int>(v);
+    t.erase(3);
+    ASSERT_EQ(expected, t.inorder_keys());
+}
+
+TEST(RBTree, EraseRoot2) {
+    std::vector<int> v{3, 2, 1};
+    std::vector<int> expected{2, 3};
+    auto t = RBTree<int>(v);
+    t.erase(1);
+    ASSERT_EQ(expected, t.inorder_keys());
+}
+
+TEST(RBTree, EraseRoot3) {
+    std::vector<int> v{5, 1, 7, 6, 9, 3};
+    std::vector<int> expected{1, 3, 6, 7 , 9};
+    auto t = RBTree<int>(v);
+    t.erase(5);
+    ASSERT_EQ(expected, t.inorder_keys());
+}
+
+TEST(RBTree, EraseMiddle1) {
+    std::vector<int> v{5, 1, 7, 6, 9, 3};
+    std::vector<int> expected{3, 5, 6, 7 , 9};
+    auto t = RBTree<int>(v);
+    t.erase(1);
+    ASSERT_EQ(expected, t.inorder_keys());
+}
+
+TEST(RBTree, EraseMiddle2) {
+    std::vector<int> v{5, 1, 7, 6, 9, 3};
+    std::vector<int> expected{1, 3, 5, 6, 9};
+    auto t = RBTree<int>(v);
+    t.erase(7);
+    ASSERT_EQ(expected, t.inorder_keys());
+}
+
+TEST(RBTree, EraseMiddle3) {
+    std::vector<int> v{5, 1, 7, 6, 3};
+    std::vector<int> expected{1, 3, 5, 6};
+    auto t = RBTree<int>(v);
+    t.erase(7);
+    ASSERT_EQ(expected, t.inorder_keys());
+}
+
+TEST(RBTree, EraseMiddle4) {
+    std::vector<int> v{5, 1, 7, 6, 9, 0};
+    std::vector<int> expected{0, 5, 6, 7, 9};
+    auto t = RBTree<int>(v);
+    t.erase(1);
+    ASSERT_EQ(expected, t.inorder_keys());
+}
+
+TEST(RBTree, EraseMiddle5) {
+    std::vector<int> v{5, 1, 3, 2, 7, 6, 0, -1, 4, 8, 9, 10, 11, 12};
+    std::vector<int> expected{-1, 0, 2, 3, 4, 5, 6, 7 ,8, 9, 10, 11, 12};
+    auto t = RBTree<int>(v);
+    t.erase(1);
+    ASSERT_EQ(expected, t.inorder_keys());
+}
+
+TEST(RBTree, EraseMiddle6) {
+    std::vector<int> v{5, 1, 3, 2, 7, 6, 0, -1, 4, 8, 9, 10, 11, 12};
+    std::vector<int> expected{-1, 0, 1, 2, 3, 4, 5, 7 ,8, 9, 10, 11, 12};
+    auto t = RBTree<int>(v);
+    t.erase(6);
+    ASSERT_EQ(expected, t.inorder_keys());
+}
+
+
+TEST(RBTree, EraseFullTree1) {
+    std::vector<int> v{5, 1, 3, 2, 7, 6, 0, -1, 4, 8, 9, 10, 11, 12};
+    std::vector<int> expected{-1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
+    auto t = RBTree<int>(v);
+    for (size_t i = 0; i < v.size(); ++i) {
+        t.erase(v[i]);
+        expected.erase(std::find(expected.begin(), expected.end(), v[i]));
+        ASSERT_EQ(expected, t.inorder_keys())
+            << "on element " << v[i];
+    }
+}
+
+TEST(RBTree, EraseFullTree2) {
+    std::vector<int> expected(100);
+    std::iota(expected.begin(), expected.end(), 0);
+    std::vector<int> copy = expected;
+    auto t = RBTree<int>(expected);
+    for (size_t i = 0; i < 100; ++i) {
+        t.erase(copy[i]);
+        expected.erase(std::find(expected.begin(), expected.end(), copy[i]));
+        ASSERT_EQ(expected, t.inorder_keys())
+            << "on element " << copy[i];
+    }
+}
+
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
