@@ -171,6 +171,9 @@ void AVLTree<T>::erase(T key) {
     AVLNode<T>* parent = curr->parent;
     if (curr->is_root()) {
         root = curr->left;
+        if (curr->left != nullptr) {
+            curr->left->parent = nullptr;
+        }
     }
     else if (curr->is_right() && curr->left != nullptr) {
         parent->right = curr->left;

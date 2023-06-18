@@ -171,18 +171,29 @@ void RBTree<T>::erase(T key) {
     RBNode<T>* parent = curr->parent;
     if (curr->is_root()) {
         root = curr->left;
+        if (curr->left != nullptr) {
+            curr->left->parent = nullptr;
+        }
     }
-    else if (curr->is_right()) {
+    else if (curr->is_right() && curr->left != nullptr) {
         parent->right = curr->left;
-        if (curr->left != nullptr) {
-            curr->left->parent = parent;
-        }
+        curr->left->parent = parent;
     }
-    else if (curr->is_left()) {
+    else if (curr->is_right() && curr->right != nullptr) {
+        parent->right = curr->right;
+        curr->right->parent = parent;
+    }
+     else if (curr->is_left() && curr->left != nullptr) {
         parent->left = curr->left;
-        if (curr->left != nullptr) {
-            curr->left->parent = parent;
-        }
+        curr->left->parent = parent;
+    }
+    else if (curr->is_left() && curr->right != nullptr) {
+        parent->left = curr->right;
+        curr->right->parent = parent;
+    } else if (curr->is_left()) {
+        parent->left = nullptr;
+    } else {
+        parent->right = nullptr;
     }
 
     update_nodes_subtree_count(parent);

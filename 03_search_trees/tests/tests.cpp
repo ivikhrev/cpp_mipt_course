@@ -14,6 +14,7 @@
 #include <fstream>
 #include <numeric>
 #include <vector>
+#include <random>
 
 namespace fs = std::filesystem;
 
@@ -302,6 +303,21 @@ TYPED_TEST(SearchingTrees, EraseFullTree2) {
     std::vector<int> copy = expected;
     auto t = decltype(this->t)(expected);
     for (size_t i = 0; i < 100; ++i) {
+        t.erase(copy[i]);
+        expected.erase(std::find(expected.begin(), expected.end(), copy[i]));
+        ASSERT_EQ(expected, t.inorder_keys())
+            << "on value " << copy[i];
+    }
+}
+
+
+TYPED_TEST(SearchingTrees, EraseFullTreeRandomValues) {
+    std::vector<int> expected(1000);
+    std::iota(expected.begin(), expected.end(), 0);
+    std::vector<int> copy = expected;
+    std::random_shuffle(copy.begin(), copy.end());
+    auto t = decltype(this->t)(expected);
+    for (size_t i = 0; i < 1000; ++i) {
         t.erase(copy[i]);
         expected.erase(std::find(expected.begin(), expected.end(), copy[i]));
         ASSERT_EQ(expected, t.inorder_keys())
