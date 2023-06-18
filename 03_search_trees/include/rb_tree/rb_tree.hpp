@@ -162,7 +162,7 @@ void RBTree<T>::erase(T key) {
     std::swap(to_delete->key, curr->key);
 
     if (curr->is_black() && (curr->left != nullptr && curr->left->is_red())) {
-            curr->left->colour = Colour::BLACK;
+        curr->left->colour = Colour::BLACK;
     } else if (curr->is_black() && (curr->left == nullptr || curr->left->is_black())) {
         fix_double_black(curr);
     }

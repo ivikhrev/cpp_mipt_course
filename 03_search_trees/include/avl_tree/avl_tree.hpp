@@ -164,94 +164,39 @@ void AVLTree<T>::erase(T key) {
         while (curr->left != nullptr) {
             curr = curr->left;
         }
-        if (curr == to_delete->right) {
-            curr->parent->right = nullptr;
-        } else {
-            curr->parent->left = nullptr;
-        }
-        curr->parent = nullptr;
     }
 
-    AVLNode<T>* parent = to_delete->parent;
-    //delete root
-    if (parent == nullptr) {
-        if (curr != nullptr && curr != to_delete) {
-            curr->left = to_delete->left;
-            if (to_delete->left != nullptr) {
-                to_delete->left->parent = curr;
-            }
+    std::swap(to_delete->key, curr->key);
 
-            auto* old_right = curr->right;
-            curr->right = to_delete->right;
-            if (to_delete->right != nullptr) {
-                to_delete->right->left = old_right;
-                to_delete->right->parent = curr;
-            }
-
-            root = curr;
-        } else {
-            curr = root = to_delete->left;
-            if (to_delete->left != nullptr) {
-                to_delete->left ->parent = nullptr;
-            }
-        }
+    AVLNode<T>* parent = curr->parent;
+    if (curr->is_root()) {
+        root = curr->left;
     }
-    else if (to_delete == parent->right && curr == to_delete) {
+    else if (curr->is_right() && curr->left != nullptr) {
         parent->right = curr->left;
-        if (curr->left != nullptr) {
-            curr->left->parent = parent;
-            curr = curr->left;
-        } else {
-            curr = parent;
-        }
+        curr->left->parent = parent;
     }
-    else if (to_delete == parent->right) {
-        parent->right = curr;
-        curr->parent = parent;
-
-        curr->left = to_delete->left;
-        if (curr->left != nullptr) {
-            curr->left->parent = curr;
-        }
-
-        curr->right = to_delete->right;
-        if (curr->right != nullptr && curr != curr->right) {
-            curr->right->parent = curr;
-        } else {
-            curr->right = nullptr;
-        }
+    else if (curr->is_right() && curr->right != nullptr) {
+        parent->right = curr->right;
+        curr->right->parent = parent;
     }
-    else if (to_delete == parent->left && curr == to_delete) {
+     else if (curr->is_left() && curr->left != nullptr) {
         parent->left = curr->left;
-        if (curr->left != nullptr) {
-            curr->left->parent = parent;
-            curr = curr->left;
-        } else {
-            curr = parent;
-        }
-
+        curr->left->parent = parent;
     }
-    else if (to_delete == parent->left) {
-        parent->left = curr;
-        curr->parent = parent;
-
-        curr->left = to_delete->left;
-        if (curr->left != nullptr) {
-            curr->left->parent = curr;
-        }
-
-        curr->right = to_delete->right;
-        if (curr->right != nullptr && curr != curr->right) {
-            curr->right->parent = curr;
-        } else {
-            curr->right = nullptr;
-        }
+    else if (curr->is_left() && curr->right != nullptr) {
+        parent->left = curr->right;
+        curr->right->parent = parent;
+    } else if (curr->is_left()) {
+        parent->left = nullptr;
+    } else {
+        parent->right = nullptr;
     }
 
     update_nodes_heights(curr);
     update_nodes_subtree_count(curr);
-    delete to_delete;
-    rebalance(curr);
+    delete curr;
+    rebalance(parent);
 }
 
 template<class T>

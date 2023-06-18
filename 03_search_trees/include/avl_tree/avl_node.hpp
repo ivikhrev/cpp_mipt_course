@@ -49,6 +49,18 @@ struct AVLNode {
         }
     }
 
+    bool is_left() const {
+        return parent != nullptr ? this == parent->left : false;
+    }
+
+    bool is_right() const {
+        return parent != nullptr ? this == parent->right : false;
+    }
+
+    bool is_root() const {
+        return parent == nullptr;
+    }
+
     int balance_factor() const;
 
     AVLNode* parent;

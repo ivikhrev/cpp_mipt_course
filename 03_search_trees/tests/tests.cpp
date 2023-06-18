@@ -291,7 +291,8 @@ TYPED_TEST(SearchingTrees, EraseFullTree1) {
     for (size_t i = 0; i < v.size(); ++i) {
         t.erase(v[i]);
         expected.erase(std::find(expected.begin(), expected.end(), v[i]));
-        ASSERT_EQ(expected, t.inorder_keys());
+        ASSERT_EQ(expected, t.inorder_keys())
+            << "on value " << v[i];
     }
 }
 
@@ -303,7 +304,8 @@ TYPED_TEST(SearchingTrees, EraseFullTree2) {
     for (size_t i = 0; i < 100; ++i) {
         t.erase(copy[i]);
         expected.erase(std::find(expected.begin(), expected.end(), copy[i]));
-        ASSERT_EQ(expected, t.inorder_keys());
+        ASSERT_EQ(expected, t.inorder_keys())
+            << "on value " << copy[i];
     }
 }
 
