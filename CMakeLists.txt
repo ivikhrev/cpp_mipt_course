@@ -73,7 +73,7 @@ macro(add_target)
         set_property(TARGET ${TEST_NAME}_generate_data PROPERTY CMAKE_CXX_COMPILER_LAUNCHER"${CMAKE_COMMAND} -E time")
 
     elseif(NOT Python3_EXECUTABLE)
-        message(WARNING "python3 executable not found. Can't generate test data, please generate in manually.")
+        message(WARNING "python3 executable not found. Can't generate test data, please generate it manually.")
     endif()
 endmacro()
 
@@ -84,3 +84,4 @@ add_subdirectory(common)
 add_subdirectory(01_caches)
 add_subdirectory(02_triangle_intersection_3d)
 add_subdirectory(03_search_trees)
+add_subdirectory(04_matrix)
