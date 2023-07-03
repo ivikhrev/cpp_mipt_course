@@ -2,10 +2,12 @@
 #include <algorithm>
 #include <ostream>
 #include <iostream>
+#include <cmath>
 
 template<class T>
 class Matrix {
 private:
+    static constexpr float epsilon = 1e-12;
     struct ProxyRow {
         T  *row;
         const T& operator[](int n) const { return row[n]; }
@@ -104,6 +106,7 @@ Matrix<T>::~Matrix() {
 
 template<class T>
 void Matrix<T>::swap_rows(int m, int n) {
+    if (m == n) return;
     for (int i = 0; i < cols; ++i) {
         std::swap((*this)[m][i], (*this)[n][i]);
     }
@@ -163,24 +166,36 @@ T Matrix<T>::det() const {
     if (rows != cols) {
         throw std::runtime_error("Determinant is defined only for square matrices");
     }
-    T d{1};
     Matrix<double> matrix(cols, rows, data, data + size);
 
     int sign = 1;
     for (int k = 0; k < cols - 1; ++k) {
-        if (matrix[k][k] == 0) {
-            matrix.swap_rows(k, k + 1);
-            sign *= -1;
+        int row = k + 1;
+        for (; row < rows && std::abs(matrix[k][k]) < epsilon; ++row) {
+            if (matrix[row][k] != 0) {
+                matrix.swap_rows(k, row);
+                sign *= -1;
+                break;
+            }
         }
-        for (int i = k + 1; i < rows ; ++i) {
+        // if not found any row with non zero element on Kth place
+        if (row == rows) break;
+
+        for (int i = k + 1; i < rows; ++i) {
             double coeff = matrix[i][k] / matrix[k][k];;
             for (int j = k; j < cols; ++j) {
                 matrix[i][j] -= matrix[k][j] * coeff;
             }
         }
     }
+
+    double d{1};
     for (int i = 0; i < rows; ++i) {
         d *= matrix[i][i];
+    }
+
+    if constexpr (std::is_same<T, int>::value) {
+        return sign * lround(d);
     }
 
     return sign * d;

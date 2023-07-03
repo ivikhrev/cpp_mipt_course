@@ -156,6 +156,70 @@ TEST(Matrix, 3x3MatrixDetWithZeroAtSecondDiagonalElement) {
 }
 
 
+class MatrixDeterminantTests : public testing::TestWithParam<std::string> {
+public:
+    static const std::string& data_directory() {
+        // Establish the directory name only once for the application.
+        static const std::string data_dir = [] {
+            // Look for an environment variable specifying the directory name.
+            const char* env_dir = std::getenv("TEST_DATA_DIR");
+            if (env_dir == nullptr) {
+                // If an environment variable is not set, rely on the definition
+                // coming from the build system.
+                return std::string(TEST_DATA_DIR);
+            }
+            // Initialise the directory name using the environment variable.
+            return std::string(env_dir);
+        }();
+
+        // Return the previously initialised variable.
+        return data_dir;
+    }
+
+protected:
+    Matrix<int> read_input_data(const fs::path& file_path) {
+        std::ifstream file(file_path);
+        int n;
+        std::vector<int> values;
+        if (file.is_open()) {
+            file >> n;
+            values.resize(n * n);
+            for (int i = 0; i < n * n; ++i) {
+                file >> values[i];
+            }
+        }
+
+        return Matrix<int>(n, n, values.begin(), values.end());
+    }
+
+    int read_answer_data(const fs::path& file_path) {
+        std::ifstream file(file_path);
+        int answer;
+        if (file.is_open()) {
+            file >> answer;
+        } else {
+            throw std::runtime_error("Can't open file" + file_path.string());
+        }
+
+        return answer;
+    }
+
+};
+
+TEST_P(MatrixDeterminantTests, End2EndTest) {
+    auto input_file = fs::path(GetParam());
+    auto answer_file = input_file.parent_path() / "answers" / input_file.filename();
+    auto matrix = read_input_data(input_file);
+    ASSERT_EQ(read_answer_data(answer_file), matrix.det())
+        << "on input data: " << input_file << '\n'
+        << "answer file: " << answer_file << '\n';
+}
+
+INSTANTIATE_TEST_SUITE_P(Matrix,
+                         MatrixDeterminantTests,
+                         ::testing::ValuesIn(get_files_in_dir(MatrixDeterminantTests::data_directory()))
+);
+
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
