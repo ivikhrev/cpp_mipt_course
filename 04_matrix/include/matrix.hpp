@@ -4,6 +4,70 @@
 #include <iostream>
 #include <cmath>
 
+template <class T>
+class Array {
+public:
+    Array(int size, T val = T{}) : data(new T[size]), size(size) {
+        std::fill_n(data, size, val);
+    }
+
+    ~Array() {
+        delete[] data;
+    }
+
+    Array(const Array &rhs) : data(new T[rhs.size]), size(rhs.size) {
+        std::copy_n(rhs.data, size, data);
+    }
+
+    Array(Array &&rhs) noexcept : data(rhs.data), size(rhs.size) {
+        rhs.data = nullptr;
+    }
+
+    Array& operator=(const Array &rhs) {
+        if (this == &rhs) {
+            return *this;
+        }
+        auto* tmp = new T[rhs.size];
+        std::copy_n(rhs.data, rhs.size, tmp);
+
+        delete[] data;
+        data = tmp;
+        size = rhs.size;
+
+        return *this;
+    }
+
+    Array& operator=(Array &&rhs) noexcept {
+        if (this == &rhs) {
+            return *this;
+        }
+        std::swap(this->data, rhs.data);
+        size = rhs.size;
+
+        return *this;
+    }
+
+    T& operator[](int i) {
+        return data[i];
+    }
+
+    const T& operator[](int i) const {
+        return data[i];
+    }
+
+private:
+    T* data;
+    int size;
+};
+
+template <class T>
+class JaggedArray {
+public:
+    Array(int size, T val = T{}) : data(size, Array<T>{size, val}) {}
+private:
+    Array<Array<T>> data;
+};
+
 template<class T>
 class Matrix {
 private:
