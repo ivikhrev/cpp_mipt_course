@@ -156,7 +156,8 @@ TEST(Matrix, 3x3MatrixDetWithZeroAtSecondDiagonalElement) {
 }
 
 
-class MatrixDeterminantTests : public testing::TestWithParam<std::string> {
+template<class MatrixRepr>
+class MatrixDeterminantTests : public testing::Test {
 public:
     static const std::string& data_directory() {
         // Establish the directory name only once for the application.
@@ -177,7 +178,7 @@ public:
     }
 
 protected:
-    Matrix<int> read_input_data(const fs::path& file_path) {
+    auto read_input_data(const fs::path& file_path) {
         std::ifstream file(file_path);
         int n;
         std::vector<int> values;
@@ -189,7 +190,7 @@ protected:
             }
         }
 
-        return Matrix<int>(n, n, values.begin(), values.end());
+        return MatrixRepr(n, n, values.begin(), values.end());
     }
 
     int read_answer_data(const fs::path& file_path) {
@@ -206,19 +207,25 @@ protected:
 
 };
 
-TEST_P(MatrixDeterminantTests, End2EndTest) {
-    auto input_file = fs::path(GetParam());
-    auto answer_file = input_file.parent_path() / "answers" / input_file.filename();
-    auto matrix = read_input_data(input_file);
-    ASSERT_EQ(read_answer_data(answer_file), matrix.det())
-        << "on input data: " << input_file << '\n'
-        << "answer file: " << answer_file << '\n';
+using MatrixReprs = testing::Types<Matrix<int, MatrixBuffer>, Matrix<int, MatrixJaggedBuffer>>;
+
+TYPED_TEST_SUITE(MatrixDeterminantTests, MatrixReprs);
+
+TYPED_TEST(MatrixDeterminantTests, End2EndTest) {
+    for (auto file_str : get_files_in_dir(this->data_directory())) {
+        auto input_file = fs::path(file_str);
+        auto answer_file = input_file.parent_path() / "answers" / input_file.filename();
+        auto matrix = this->read_input_data(input_file);
+        ASSERT_EQ(this->read_answer_data(answer_file), matrix.det())
+            << "on input data: " << input_file << '\n'
+            << "answer file: " << answer_file << '\n';
+    }
 }
 
-INSTANTIATE_TEST_SUITE_P(Matrix,
-                         MatrixDeterminantTests,
-                         ::testing::ValuesIn(get_files_in_dir(MatrixDeterminantTests::data_directory()))
-);
+// INSTANTIATE_TEST_SUITE_P(Matrix,
+//                          MatrixDeterminantTests,
+//                          ::testing::ValuesIn(get_files_in_dir(MatrixDeterminantTests::data_directory()))
+// );
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
